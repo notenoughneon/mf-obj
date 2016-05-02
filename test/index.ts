@@ -89,6 +89,24 @@ describe('entry', function() {
        .then(() => assert(false))
        .catch(err => done(err.message === 'Multiple h-entries found' ? null : err));
     });
+    
+    it('can load non-mf content', function(done) {
+        var html =
+            '<html>\
+            <head><title>Content title</title></head>\
+            <body>\
+            <p>Lorem ipsum <i>dolor</i>\
+            </body>\
+            </html>';
+        mfo.getEntry(html, 'http://testsite/nonmf.html', true)
+        .then(e => {
+            assert.equal(e.url, 'http://testsite/nonmf.html');
+            assert.equal(e.name, 'Content title');
+            assert.equal(e.content.value, ' Lorem ipsum dolor ');
+        })
+        .then(done)
+        .catch(done);
+    });
 
     it('can load a note', function(done) {
         var html =
@@ -162,7 +180,93 @@ describe('entry', function() {
             then(done).
             catch(done);
     });
-
+    
+    it('can load a like', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/2"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:10:00Z"></time>\
+                <a class="u-like-of" href="/2015/8/28/1"></a>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content">Here is a <i>like</i></div>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite').
+            then(function(entry) {
+                assert.deepEqual(entry, {
+                    "name":"Here is a like",
+                    "published":new Date("2015-08-28T08:10:00Z"),
+                    "content":{"value":"Here is a like","html":"Here is a <i>like</i>"},
+                    "summary":null,
+                    "url":"http://testsite/2015/8/28/2",
+                    "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":[],
+                    "syndication":[],
+                    "replyTo": null,
+                    "likeOf":{
+                        "name":null,
+                        "published":null,
+                        "content":null,
+                        "summary":null,
+                        "url":"http://testsite/2015/8/28/1",
+                        "author":null,
+                        "category":[],
+                        "syndication":[],
+                        "replyTo":null,
+                        "likeOf":null,
+                        "repostOf":null,
+                        "children":[]
+                    },
+                    "repostOf":null,
+                    "children":[]}
+                );
+            }).
+            then(done).
+            catch(done);
+    });
+    
+    it('can load a repost', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/2"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:10:00Z"></time>\
+                <a class="u-repost-of" href="/2015/8/28/1"></a>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content">Here is a <i>repost</i></div>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite').
+            then(function(entry) {
+                assert.deepEqual(entry, {
+                    "name":"Here is a repost",
+                    "published":new Date("2015-08-28T08:10:00Z"),
+                    "content":{"value":"Here is a repost","html":"Here is a <i>repost</i>"},
+                    "summary":null,
+                    "url":"http://testsite/2015/8/28/2",
+                    "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":[],
+                    "syndication":[],
+                    "replyTo":null,
+                    "likeOf":null,
+                    "repostOf":{
+                        "name":null,
+                        "published":null,
+                        "content":null,
+                        "summary":null,
+                        "url":"http://testsite/2015/8/28/1",
+                        "author":null,
+                        "category":[],
+                        "syndication":[],
+                        "replyTo":null,
+                        "likeOf":null,
+                        "repostOf":null,
+                        "children":[]
+                    },
+                    "children":[]}
+                );
+            }).
+            then(done).
+            catch(done);
+    });
+    
     it('can load an article', function(done) {
         var html =
             '<div class="h-entry">\
@@ -209,9 +313,69 @@ describe('entry', function() {
             catch(done);
     });
     
-    it('domain works', function() {
+    it('getDomain works', function() {
         assert.equal((new mfo.Entry('http://somesite.com/2015/1/2/3')).getDomain(), 'http://somesite.com');
         assert.equal((new mfo.Entry('https://somesite.com:8080/2015/1/2/3')).getDomain(), 'https://somesite.com:8080');
+    });
+    
+    it('getPath works', function() {
+        assert.equal((new mfo.Entry('http://somesite.com/2015/1/2/3')).getPath(), '/2015/1/2/3');
+        assert.equal((new mfo.Entry('https://somesite.com:8080/2015/1/2/3')).getPath(), '/2015/1/2/3');
+    });
+    
+    it('getReferences works', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/4"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:10:00Z"></time>\
+                <a class="u-in-reply-to" href="/2015/8/28/1"></a>\
+                <a class="u-like-of" href="/2015/8/28/2"></a>\
+                <a class="u-repost-of" href="/2015/8/28/3"></a>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content">Here is a <a href="http://othersite/1/2/3">content link</a></div>\
+                <div class="h-cite">\
+                <a class="u-url" href="/2015/8/28/5"></a>\
+                <a class="u-like-of" href="/2015/8/28/4"></a>\
+                </div>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite')
+        .then(e => {
+            assert.deepEqual(e.getReferences(), [
+                'http://testsite/2015/8/28/1',
+                'http://testsite/2015/8/28/2',
+                'http://testsite/2015/8/28/3'
+            ]);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('getMentions works', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/4"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:10:00Z"></time>\
+                <a class="u-in-reply-to" href="/2015/8/28/1"></a>\
+                <a class="u-like-of" href="/2015/8/28/2"></a>\
+                <a class="u-repost-of" href="/2015/8/28/3"></a>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content">Here is a <a href="http://othersite/1/2/3">content link</a></div>\
+                <div class="h-cite">\
+                <a class="u-url" href="/2015/8/28/5"></a>\
+                <a class="u-like-of" href="/2015/8/28/4"></a>\
+                </div>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite')
+        .then(e => {
+            assert.deepEqual(e.getMentions(), [
+                'http://testsite/2015/8/28/1',
+                'http://testsite/2015/8/28/2',
+                'http://testsite/2015/8/28/3',
+                'http://othersite/1/2/3'
+            ]);
+        })
+        .then(done)
+        .catch(done);
     });
     
     it('deduplicate works', function() {
@@ -340,6 +504,42 @@ describe('entry', function() {
             assert(e.author !== null);
             assert(e.author.name === null);
             assert(e.author.photo === null);
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('getThreadFromUrl works', function(done) {
+        var pages = {
+            'http://somesite/1': '<div class="h-entry">\
+                <a class="u-url" href="/1"></a>\
+                <div class="p-name e-content">content 1</div>\
+                </div>',
+            'http://somesite/2': '<div class="h-entry">\
+                <a class="u-in-reply-to" href="/1"></a>\
+                <a class="u-url" href="/2"></a>\
+                <div class="p-name e-content">content 2</div>\
+                <div class="h-cite"><a class="u-url" href="/3"></a></div>\
+                </div>',
+            'http://somesite/3': '<div class="h-entry">\
+                <a class="u-url" href="/3"></a>\
+                <div class="p-name e-content">content 3</div>\
+                <div class="h-cite"><a class="u-url" href="http://othersite/4"></a></div>\
+                </div>',
+            'http://othersite/4': '<div class="h-entry">\
+                <a class="u-url" href="/4"></a>\
+                <div class="p-name e-content">content 4</div>\
+                </div>'
+        };
+        mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
+        mfo.getThreadFromUrl('http://somesite/2')
+        .then(t => {
+            assert.deepEqual(t.map(e => e.url), [
+                'http://somesite/2',
+                'http://somesite/3',
+                'http://somesite/1',
+                'http://othersite/4']);
+            assert.deepEqual(t.map(e => e.name), ['content 2', 'content 3', 'content 1', 'content 4']);
         })
         .then(done)
         .catch(done);
