@@ -1,0 +1,39 @@
+{
+  "name": "mf-obj",
+  "version": "1.0.0",
+  "description": "Microformat objects",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "prebuild": "typings install",
+    "build": "tsc || true",
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/notenoughneon/mf-obj.git"
+  },
+  "keywords": [
+    "microformat",
+    "indieweb"
+  ],
+  "author": "Emma Kuo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/notenoughneon/mf-obj/issues"
+  },
+  "homepage": "https://github.com/notenoughneon/mf-obj#readme",
+  "dependencies": {
+    "cheerio": "^0.20.0",
+    "debug": "^2.2.0",
+    "microformat-node": "^1.2.0",
+    "request": "^2.72.0"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "typescript": "^1.8.10",
+    "typings": "^0.8.1"
+  }
+}

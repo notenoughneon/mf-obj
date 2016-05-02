@@ -1,0 +1,8 @@
+{
+  "ambientDependencies": {
+    "cheerio": "registry:dt/cheerio#0.17.0+20160407085313",
+    "mocha": "registry:dt/mocha#2.2.5+20160317120654",
+    "node": "registry:dt/node#4.0.0+20160501135006",
+    "request": "registry:dt/request#0.0.0+20160316155526"
+  }
+}
