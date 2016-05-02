@@ -9,7 +9,8 @@
   "scripts": {
     "prebuild": "typings install",
     "build": "tsc || true",
-    "test": "mocha test"
+    "test": "mocha test",
+    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- test"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,8 @@
     "request": "^2.72.0"
   },
   "devDependencies": {
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
     "typescript": "^1.8.10",
     "typings": "^0.8.1"
