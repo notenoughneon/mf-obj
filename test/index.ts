@@ -1,19 +1,19 @@
 import assert = require('assert');
-import microformat = require('../index');
+import mfo = require('../index');
 
 describe('entry', function() {
     var orig_request;
     
     before(function() {
-        orig_request = microformat.request;
+        orig_request = mfo.request;
     });
     
     after(function() {
-        microformat.request = orig_request;
+        mfo.request = orig_request;
     });
     
     it('can be constructed with no args', function() {
-        var entry = new microformat.Entry();
+        var entry = new mfo.Entry();
         assert.equal(entry.url, null);
         assert.equal(entry.replyTo, null);
         assert.deepEqual(entry.getChildren(), []);
@@ -21,22 +21,22 @@ describe('entry', function() {
 
     it('can be constructed from url string', function() {
         var url = 'http://localhost:8000/firstpost';
-        var entry = new microformat.Entry(url);
+        var entry = new mfo.Entry(url);
         assert.equal(url, entry.url);
     });
 
-    var serializeEntry = new microformat.Entry();
+    var serializeEntry = new mfo.Entry();
     serializeEntry.url = 'http://testsite/2015/8/28/2';
     serializeEntry.name = 'Hello World!';
     serializeEntry.published = new Date('2015-08-28T08:00:00Z');
     serializeEntry.content = {"value":"Hello World!","html":"Hello <b>World!</b>"};
     serializeEntry.summary = "Summary";
     serializeEntry.category = ['indieweb'];
-    serializeEntry.author = new microformat.Card();
+    serializeEntry.author = new mfo.Card();
     serializeEntry.author.name = 'Test User';
     serializeEntry.author.url = 'http://testsite';
-    serializeEntry.replyTo = new microformat.Entry('http://testsite/2015/8/28/2');
-    serializeEntry.addChild(new microformat.Entry('http://testsite/2015/8/28/3'));
+    serializeEntry.replyTo = new mfo.Entry('http://testsite/2015/8/28/2');
+    serializeEntry.addChild(new mfo.Entry('http://testsite/2015/8/28/3'));
 
     var serializeJson = '{"name":"Hello World!",\
 "published":"2015-08-28T08:00:00.000Z",\
@@ -56,7 +56,7 @@ describe('entry', function() {
     });
 
     it('can be deserialized', function() {
-        assert.deepEqual(microformat.Entry.deserialize(serializeJson), serializeEntry);
+        assert.deepEqual(mfo.Entry.deserialize(serializeJson), serializeEntry);
     });
     
     it('can deserialize null values', function() {
@@ -71,7 +71,7 @@ describe('entry', function() {
 "likeOf":null,\
 "repostOf":null,\
 "children":[]}';
-        var entry = microformat.Entry.deserialize(json);
+        var entry = mfo.Entry.deserialize(json);
         assert.equal(entry.name, null);
         assert.equal(entry.published, null);
         assert.equal(entry.content, null);
@@ -79,13 +79,13 @@ describe('entry', function() {
     });
 
     it('err for no entry', function(done) {
-       microformat.getEntry('<html></html>', 'http://testsite')
+       mfo.getEntry('<html></html>', 'http://testsite')
        .then(() => assert(false))
        .catch(err => done(err.message == 'No h-entry found' ? null : err));
     });
 
     it('err for multiple entries', function(done) {
-       microformat.getEntry('<html><div class="h-entry"></div><div class="h-entry"></div></html>', 'http://testsite')
+       mfo.getEntry('<html><div class="h-entry"></div><div class="h-entry"></div></html>', 'http://testsite')
        .then(() => assert(false))
        .catch(err => done(err.message === 'Multiple h-entries found' ? null : err));
     });
@@ -99,7 +99,7 @@ describe('entry', function() {
                 <span class="p-category">indieweb</span>\
                 <div class="p-name e-content">Hello <b>World!</b></div>\
             </div>';
-        microformat.getEntry(html, 'http://testsite').
+        mfo.getEntry(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"Hello World!",
@@ -129,7 +129,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content">Here is a <i>reply</i></div>\
             </div>';
-        microformat.getEntry(html, 'http://testsite').
+        mfo.getEntry(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"Here is a reply",
@@ -172,7 +172,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content"><div class="p-summary">Summary</div> Hello <b>World!</b></div>\
             </div>';
-        microformat.getEntry(html, 'http://testsite').
+        mfo.getEntry(html, 'http://testsite').
             then(function(entry) {
                 assert.deepEqual(entry, {
                     "name":"First Post",
@@ -201,7 +201,7 @@ describe('entry', function() {
                 <a class="p-author h-card" href="http://testsite">Test User</a>\
                 <div class="p-name e-content"><img class="u-photo" src="photo.jpg"/></div>\
             </div>';
-        microformat.getEntry(html, 'http://testsite').
+        mfo.getEntry(html, 'http://testsite').
             then(function(entry){
                 assert.equal(entry.isArticle(), false);
             }).
@@ -210,14 +210,14 @@ describe('entry', function() {
     });
     
     it('domain works', function() {
-        assert.equal((new microformat.Entry('http://somesite.com/2015/1/2/3')).getDomain(), 'http://somesite.com');
-        assert.equal((new microformat.Entry('https://somesite.com:8080/2015/1/2/3')).getDomain(), 'https://somesite.com:8080');
+        assert.equal((new mfo.Entry('http://somesite.com/2015/1/2/3')).getDomain(), 'http://somesite.com');
+        assert.equal((new mfo.Entry('https://somesite.com:8080/2015/1/2/3')).getDomain(), 'https://somesite.com:8080');
     });
     
     it('deduplicate works', function() {
-        var entry = new microformat.Entry('http://testsite/2015/10/6/1');
-        var c1 = new microformat.Entry('http://testsite/2015/10/6/2');
-        var c2 = new microformat.Entry('http://testsite/2015/10/6/3');
+        var entry = new mfo.Entry('http://testsite/2015/10/6/1');
+        var c1 = new mfo.Entry('http://testsite/2015/10/6/2');
+        var c2 = new mfo.Entry('http://testsite/2015/10/6/3');
         entry.addChild(c1);
         entry.addChild(c2);
         entry.addChild(c1);
@@ -228,8 +228,8 @@ describe('entry', function() {
         var pages = {
             'http://somesite/post': '<div class="h-entry">Test post</div>',
         };
-        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getEntryFromUrl('http://somesite/post')
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.name === 'Test post');
         })
@@ -238,15 +238,15 @@ describe('entry', function() {
     });
     
     it('getEntryFromUrl 404', function(done) {
-        microformat.request = url => Promise.resolve({statusCode: 404, body: ''});
-        microformat.getEntryFromUrl('http://somesite/post')
+        mfo.request = url => Promise.resolve({statusCode: 404, body: ''});
+        mfo.getEntryFromUrl('http://somesite/post')
        .then(() => assert(false))
        .catch(err => done(err.message == 'Server returned status 404' ? null : err));
     });
 
     it('authorship author-page by url', function(done) {
         var html = '<div class="h-entry"><a class="u-author" href="/author"></a></div>';
-        microformat.getEntry(html, 'http://somesite/post')
+        mfo.getEntry(html, 'http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.url === 'http://somesite/author');
@@ -257,7 +257,7 @@ describe('entry', function() {
         
     it('authorship author-page by rel-author', function(done) {
         var html = '<div class="h-entry"></div><a rel="author" href="/author"></a>';
-        microformat.getEntry(html, 'http://somesite/post')
+        mfo.getEntry(html, 'http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.url === 'http://somesite/author');
@@ -271,8 +271,8 @@ describe('entry', function() {
             'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
             'http://somesite/': '<div class="h-card"><a class="u-uid" href="/"><img src="me.jpg">Test User</a></div>'
         };
-        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getEntryFromUrl('http://somesite/post')
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === 'Test User');
@@ -287,8 +287,8 @@ describe('entry', function() {
             'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
             'http://somesite/': '<a class="h-card" rel="me" href="/"><img src="me.jpg">Test User</a>'
         };
-        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getEntryFromUrl('http://somesite/post')
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === 'Test User');
@@ -303,8 +303,8 @@ describe('entry', function() {
             'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
             'http://somesite/': '<a class="h-card" href="/"><img src="me.jpg">Test User</a>'
         };
-        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getEntryFromUrl('http://somesite/post')
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === 'Test User');
@@ -319,8 +319,8 @@ describe('entry', function() {
             'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>',
             'http://somesite/': '<a class="h-card" href="/notme"><img src="me.jpg">Test User</a>'
         };
-        microformat.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
-        microformat.getEntryFromUrl('http://somesite/post')
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === null);
@@ -334,8 +334,8 @@ describe('entry', function() {
         var pages = {
             'http://somesite/post': '<div class="h-entry"><a class="u-author" href="/"></a></div>'
         };
-        microformat.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
-        microformat.getEntryFromUrl('http://somesite/post')
+        mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
+        mfo.getEntryFromUrl('http://somesite/post')
         .then(e => {
             assert(e.author !== null);
             assert(e.author.name === null);
@@ -350,7 +350,7 @@ describe('entry', function() {
         <div class="h-cite"><a class="u-url" href="http://othersite/123"></a>a comment</div>\
         <div class="h-card"><a class="u-url" href="http://testsite"></a>a card</div>\
         </div>';
-        microformat.getEntry(html, 'http://testsite')
+        mfo.getEntry(html, 'http://testsite')
         .then(e => {
             assert(e.getChildren().length === 1);
             assert(e.getChildren()[0].name === 'a comment');

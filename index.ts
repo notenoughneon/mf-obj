@@ -2,7 +2,7 @@ var parser = require('microformat-node');
 import Request = require('request');
 import cheerio = require('cheerio');
 import url = require('url');
-var debug = require('debug')('microformat');
+var debug = require('debug')('mf-obj');
 
 export var request = function(url: string): Promise<any> {
     return new Promise((resolve, reject) => {
