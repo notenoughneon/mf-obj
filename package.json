@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Microformat objects",
   "main": "index.js",
-  "directories": {
-    "test": "test"
+  "typings": "index.d.ts",
+  "engines": {
+    "node": ">=4.0.0"
   },
   "scripts": {
     "prebuild": "typings install",
