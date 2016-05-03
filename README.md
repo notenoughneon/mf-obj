@@ -1,4 +1,5 @@
 # mf-obj
+[![npm](https://img.shields.io/npm/v/mf-obj.svg?maxAge=2592000?style=plastic)](https://www.npmjs.com/package/mf-obj)
 [![Build Status](https://travis-ci.org/notenoughneon/mf-obj.svg?branch=master)](https://travis-ci.org/notenoughneon/mf-obj)
 [![Coverage Status](https://coveralls.io/repos/github/notenoughneon/mf-obj/badge.svg?branch=master)](https://coveralls.io/github/notenoughneon/mf-obj?branch=master)
 
