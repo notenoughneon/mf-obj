@@ -48,40 +48,40 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
 
 ## API
 
-1. Utility functions
-  * getEntry(html, url)
-  * getEntryFromUrl(url)
-  * getThreadFromUrl(url)
-2. Entry
-  * name
-  * published
-  * content
-  * summary
-  * url
-  * author
-  * category
-  * syndication
-  * replyTo
-  * likeOf
-  * repostOf
-  * getDomain()
-  * getPath()
-  * getReferences()
-  * getMentions()
-  * getChildren(sortFunc?)
-  * addChild(entry)
-  * deleteChild(url)
-  * isReply()
-  * isLike()
-  * isRepost()
-  * isArticle()
-  * serialize()
-  * Entry.deserialize(json)
-3. Card
-  * name
-  * photo
-  * url
-  * uid
+1. [Utility functions](#utility-functions)
+  * [getEntry(html, url)](#getentry)
+  * [getEntryFromUrl(url)](#getentryfromurl)
+  * [getThreadFromUrl(url)](#getthreadfromurl)
+2. [Entry](#entry)
+  * [name](#name)
+  * [published](#published)
+  * [content](#content)
+  * [summary](#summary)
+  * [url](#url)
+  * [author](#author)
+  * [category](#category)
+  * [syndication](#syndication)
+  * [replyTo](#replyto)
+  * [likeOf](#likeof)
+  * [repostOf](#repostof)
+  * [getDomain()](#getdomain)
+  * [getPath()](#getpath)
+  * [getReferences()](#getreferences)
+  * [getMentions()](#getmentions)
+  * [getChildren(sortFunc?)](#getchildren)
+  * [addChild(entry)](#addchild)
+  * [deleteChild(url)](#deletechild)
+  * [isReply()](#isreply)
+  * [isLike()](#islike)
+  * [isRepost()](#isrepost)
+  * [isArticle()](#isarticle)
+  * [serialize()](#serialize)
+  * [deserialize(json)](#deserialize)
+3. [Card](#card)
+  * [name](#name-1)
+  * [photo](#photo)
+  * [url](#url-1)
+  * [uid](#uid)
   
 ### Utility functions
 
@@ -270,7 +270,7 @@ Example output:
 }
 ```
 
-#### Entry.deserialize
+#### deserialize
 
 Static method to deserialize json. Nested objects from replyTo, likeOf, repostOf, and children are deserialized as stub Entry objects with only url set.
 
