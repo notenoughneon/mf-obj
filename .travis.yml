@@ -1,6 +1,5 @@
 language: node_js
 node_js:
-  - "4"
   - "6"
 before_script: "npm run-script build"
 script: "npm run-script test-travis"
