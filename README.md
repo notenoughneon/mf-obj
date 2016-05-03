@@ -12,7 +12,7 @@ Microformat objects are a set of utility classes for working with indieweb [post
 * Parse comments and reply contexts as nested objects
 * Resolve author with the [authorship algorithm](http://indiewebcamp.com/authorship)
 * Get a list of [webmention](http://indiewebcamp.com/Webmention) targets
-* Serialize and deserialize from JSON (see [jf2](http://indiewebcamp.com/jf2))
+* Serialize and deserialize from JSON
 
 ## Installation
 
@@ -51,6 +51,7 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
 1. [Utility functions](#utility-functions)
   * [getEntry(html, url)](#getentry)
   * [getEntryFromUrl(url)](#getentryfromurl)
+  * [getCardFromUrl(url)](#getcardfromurl)
   * [getThreadFromUrl(url)](#getthreadfromurl)
 2. [Entry](#entry)
   * [name](#name)
@@ -93,7 +94,7 @@ mfo.getEntry(html, url)
   //...
 });
 ```
-Parses html for a single h-entry and returns a promise for an Entry object. Throws an exception if it does not find one and only one top-level h-entry.
+Parses html for a single h-entry and returns a *Promise* for an Entry. Throws an exception if it does not find one and only one top-level h-entry.
 
 #### getEntryFromUrl()
 
@@ -103,7 +104,17 @@ mfo.getEntryFromUrl(url)
   //...
 });
 ```
-Fetches the post at url and returns a promise for an Entry object. This will perform the authorship algorithm and fetch the author h-card from a separate url if necessary.
+Fetches the page at url and returns a *Promise* for an Entry. This will perform the authorship algorithm and fetch the author h-card from a separate url if necessary.
+
+#### getCardFromUrl()
+
+```javascript
+mfo.getCardFromUrl(url)
+.then(card => {
+  //...
+});
+```
+Fetches the page at url and returns a *Promise* for a Card. This will return null if an h-card could not be found according to the authorship algorithm.
 
 #### getThreadFromUrl()
 ```javascript
@@ -114,7 +125,7 @@ mfo.getThreadFromUrl(url)
   }
 });
 ```
-Follows the chain of replies starting at url and returns a promise for an array of Entry objects. This uses breadth-first search to traverse the graph of posts found by following the urls in reply-to, like-of, repost-of, and children.
+Follows the chain of replies starting at url and returns a *Promise* for an array of Entry objects. This uses breadth-first search to traverse the graph of posts found by following the urls in reply-to, like-of, repost-of, and children.
 
 ### Entry
 
