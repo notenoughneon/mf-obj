@@ -91,14 +91,16 @@ describe('entry', function() {
     });
     
     it('can load non-mf (plain html)', function(done) {
-        var html =
-            '<html>\
-            <head><title>Content title</title></head>\
-            <body>\
-            <p>Lorem ipsum <i>dolor</i>\
-            </body>\
-            </html>';
-        mfo.getEntry(html, 'http://testsite/nonmf.html', true)
+        var pages = {
+            'http://testsite/nonmf.html': '<html>\
+                <head><title>Content title</title></head>\
+                <body>\
+                <p>Lorem ipsum <i>dolor</i>\
+                </body>\
+                </html>'
+        };
+        mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
+        mfo.getEntryFromUrl('http://testsite/nonmf.html', {strategies: ['mf2','html']})
         .then(e => {
             assert.equal(e.url, 'http://testsite/nonmf.html');
             assert.equal(e.name, 'Content title');
@@ -127,7 +129,7 @@ describe('entry', function() {
                 }'
         };
         mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
-        mfo.getEntryFromUrl('http://testsite/nonmf', true)
+        mfo.getEntryFromUrl('http://testsite/nonmf', {strategies: ['mf2','oembed']})
         .then(e => {
             assert.equal(e.url, 'http://testsite/nonmf');
             assert.equal(e.name, 'Content title');
@@ -138,6 +140,22 @@ describe('entry', function() {
         .then(done)
         .catch(done);
     });
+    
+    it('all strategy failure', function(done) {
+        var pages = {
+            'http://testsite/nonmf.html': '<html>\
+                <head><title>Content title</title></head>\
+                <body>\
+                <p>Lorem ipsum <i>dolor</i>\
+                </body>\
+                </html>'
+        };
+        mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
+        mfo.getEntryFromUrl('http://testsite/nonmf.html', {strategies: ['mf2','oembed']})
+       .then(() => assert(false))
+       .catch(err => done(err.message.startsWith('All strategies failed') ? null : err));
+    });
+
 
     it('can load a note', function(done) {
         var html =

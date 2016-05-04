@@ -30,6 +30,54 @@ function getLinks(html) {
     return $('a').toArray().map(a => a.attribs['href']);
 }
 
+export type Strategy = 'mf2' | 'oembed' | 'html';
+
+export interface Options {
+    strategies: Strategy[];
+}
+
+var defaultOptions: Options = {
+    strategies: ['mf2']
+};
+
+var strategies = {
+    'mf2' : async function(html, url) {
+        var entry = await getEntry(html, url);
+        if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
+            try {
+                var author = await getCardFromUrl(entry.author.url);
+                if (author !== null)
+                    entry.author = author;
+            } catch (err) {
+                debug('Failed to fetch author page: ' + err.message);
+            }
+        }
+        return entry;
+    },
+    'oembed': async function(html, url) {
+        let entry = new Entry(url);
+        var oembed = await getOembed(html);
+        if (oembed.title != null)
+            entry.name = oembed.title;
+        if (oembed.html != null) {
+            let $ = cheerio.load(oembed.html);
+            entry.content = {html: oembed.html, value: $(':root').text()};
+        }
+        if (oembed.author_url != null && oembed.author_name != null) {
+            entry.author = new Card(oembed.author_url);
+            entry.author.name = oembed.author_name;
+        }
+        return entry;
+    },
+    'html': async function(html, url) {
+        let entry = new Entry(url);
+        let $ = cheerio.load(html);
+        entry.name = $('title').text();
+        entry.content = {html: html, value: $('body').text()};
+        return entry;
+    }
+}
+
 export async function getThreadFromUrl(seed: string) {
     var boundary: string[] = [];
     var entryDict: Map<string, Entry> = new Map();
@@ -51,27 +99,27 @@ export async function getThreadFromUrl(seed: string) {
     return Array.from(entryDict.values());
 }
 
-export async function getEntryFromUrl(url: string, inclNonMf?: boolean): Promise<Entry> {
-    var res = await request(url);
+export async function getEntryFromUrl(url: string, options?: Options): Promise<Entry> {
+    if (options == null)
+        options = defaultOptions;
+    var errs = [];
     debug('Fetching ' + url);
+    var res = await request(url);
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
-    var entry = await getEntry(res.body, url, inclNonMf);
-    if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
+    for (let s of options.strategies) {
         try {
-            var author = await getCardFromUrl(entry.author.url);
-            if (author !== null)
-                entry.author = author;
+            return await strategies[s](res.body, url);
         } catch (err) {
-            debug('Failed to fetch author page: ' + err.message);
+            errs.push(err);
         }
     }
-    return entry;
+    throw new Error('All strategies failed: ' + errs.reduce((p,c) => p + ',' + c.message));
 }
 
 export async function getCardFromUrl(url: string): Promise<Card> {
-    var res = await request(url);
     debug('Fetching ' + url);
+    var res = await request(url);
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
     var mf = await parser.getAsync({html: res.body, baseUrl: url});
@@ -105,48 +153,19 @@ export async function getCardFromUrl(url: string): Promise<Card> {
     return null;
 }
 
-export async function getEntry(html: string, url: string, inclNonMf?: boolean): Promise<Entry> {
-    try {
-        var mf = await parser.getAsync({html: html, baseUrl: url});
-        var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
-        if (entries.length == 0)
-            throw new Error('No h-entry found');
-        else if (entries.length > 1)
-            throw new Error('Multiple h-entries found');
-        let entry = buildEntry(entries[0]);
-        if (entry.author === null) {
-            if (mf.rels.author != null && mf.rels.author.length > 0) {
-                entry.author = new Card(mf.rels.author[0]);
-            }
+export async function getEntry(html: string, url: string): Promise<Entry> {
+    var mf = await parser.getAsync({html: html, baseUrl: url});
+    var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
+    if (entries.length == 0)
+        throw new Error('No h-entry found');
+    else if (entries.length > 1)
+        throw new Error('Multiple h-entries found');
+    let entry = buildEntry(entries[0]);
+    if (entry.author === null) {
+        if (mf.rels.author != null && mf.rels.author.length > 0) {
+            entry.author = new Card(mf.rels.author[0]);
         }
-        return entry;
-    } catch (err) {
-        if (!inclNonMf === true)
-            throw err;
     }
-    
-    // Fallback to oembed link
-    try {
-        let entry = new Entry(url);
-        var oembed = await getOembed(html);
-        if (oembed.title != null)
-            entry.name = oembed.title;
-        if (oembed.html != null) {
-            let $ = cheerio.load(oembed.html);
-            entry.content = {html: oembed.html, value: $(':root').text()};
-        }
-        if (oembed.author_url != null && oembed.author_name != null) {
-            entry.author = new Card(oembed.author_url);
-            entry.author.name = oembed.author_name;
-        }
-        return entry;
-    } catch (err) {}
-    
-    // Fallback to plain html
-    let entry = new Entry(url);
-    let $ = cheerio.load(html);
-    entry.name = $('title').text();
-    entry.content = {html: html, value: $('body').text()};
     return entry;
 }
 
