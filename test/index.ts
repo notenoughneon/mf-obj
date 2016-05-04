@@ -90,7 +90,7 @@ describe('entry', function() {
        .catch(err => done(err.message === 'Multiple h-entries found' ? null : err));
     });
     
-    it('can load non-mf content', function(done) {
+    it('can load non-mf (plain html)', function(done) {
         var html =
             '<html>\
             <head><title>Content title</title></head>\
@@ -102,7 +102,38 @@ describe('entry', function() {
         .then(e => {
             assert.equal(e.url, 'http://testsite/nonmf.html');
             assert.equal(e.name, 'Content title');
-            assert.equal(e.content.value, ' Lorem ipsum dolor ');
+            assert.equal(e.content.value.replace(/\s+/g, ' ').trim(), 'Lorem ipsum dolor');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('can load non-mf (oembed)', function(done) {
+        var pages = {
+            'http://testsite/nonmf': '<html>\
+                <head>\
+                <title>Content title</title>\
+                <link rel="alternate" type="application/json+oembed" href="http://testsite/oembed?url=nonmf">\
+                </head>\
+                <body>\
+                <p>Lorem ipsum <i>dolor</i>\
+                </body>\
+                </html>',
+            'http://testsite/oembed?url=nonmf': '{\
+                "title": "Content title",\
+                "author_name": "Test user",\
+                "author_url": "http://testsite/testuser",\
+                "html": "Lorem ipsum"\
+                }'
+        };
+        mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
+        mfo.getEntryFromUrl('http://testsite/nonmf', true)
+        .then(e => {
+            assert.equal(e.url, 'http://testsite/nonmf');
+            assert.equal(e.name, 'Content title');
+            assert.equal(e.author.name, 'Test user');
+            assert.equal(e.author.url, 'http://testsite/testuser');
+            assert.equal(e.content.html, 'Lorem ipsum');
         })
         .then(done)
         .catch(done);

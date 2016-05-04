@@ -6,8 +6,23 @@ var debug = require('debug')('mf-obj');
 
 export var request = function(url: string): Promise<any> {
     return new Promise((resolve, reject) => {
-        Request.get(url, (err, result) => err !== null ? reject(err) : resolve(result));
+        Request.get({url, headers: {'User-Agent': 'request'}}, (err, result) => err !== null ? reject(err) : resolve(result));
     });
+}
+
+async function getOembed(html: string) {
+    var $ = cheerio.load(html);
+    var link = $('link[rel=\'alternate\'][type=\'application/json+oembed\'],' +
+        'link[rel=\'alternate\'][type=\'text/json+oembed\']').attr('href');
+    if (link == null)
+        throw new Error('No oembed link found');
+    debug('Fetching ' + link);
+    var res = await request(link);
+    if (res.statusCode !== 200)
+        throw new Error('Server returned status ' + res.statusCode);
+    var embed = JSON.parse(res.body);
+    debug(embed);
+    return embed;
 }
 
 function getLinks(html) {
@@ -90,7 +105,7 @@ export async function getCardFromUrl(url: string): Promise<Card> {
     return null;
 }
 
-export async function getEntry(html: string | Buffer, url: string, inclNonMf?: boolean): Promise<Entry> {
+export async function getEntry(html: string, url: string, inclNonMf?: boolean): Promise<Entry> {
     try {
         var mf = await parser.getAsync({html: html, baseUrl: url});
         var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
@@ -98,7 +113,7 @@ export async function getEntry(html: string | Buffer, url: string, inclNonMf?: b
             throw new Error('No h-entry found');
         else if (entries.length > 1)
             throw new Error('Multiple h-entries found');
-        var entry = buildEntry(entries[0]);
+        let entry = buildEntry(entries[0]);
         if (entry.author === null) {
             if (mf.rels.author != null && mf.rels.author.length > 0) {
                 entry.author = new Card(mf.rels.author[0]);
@@ -106,16 +121,33 @@ export async function getEntry(html: string | Buffer, url: string, inclNonMf?: b
         }
         return entry;
     } catch (err) {
-        if (inclNonMf === true) {
-            var entry = new Entry(url);
-            let $ = cheerio.load(html);
-            entry.name = $('title').text();
-            entry.content = {html: null, value: $('body').text().replace(/\s+/g, ' ')};
-            return entry;
-        }
-        else
+        if (!inclNonMf === true)
             throw err;
     }
+    
+    // Fallback to oembed link
+    try {
+        let entry = new Entry(url);
+        var oembed = await getOembed(html);
+        if (oembed.title != null)
+            entry.name = oembed.title;
+        if (oembed.html != null) {
+            let $ = cheerio.load(oembed.html);
+            entry.content = {html: oembed.html, value: $(':root').text()};
+        }
+        if (oembed.author_url != null && oembed.author_name != null) {
+            entry.author = new Card(oembed.author_url);
+            entry.author.name = oembed.author_name;
+        }
+        return entry;
+    } catch (err) {}
+    
+    // Fallback to plain html
+    let entry = new Entry(url);
+    let $ = cheerio.load(html);
+    entry.name = $('title').text();
+    entry.content = {html: html, value: $('body').text()};
+    return entry;
 }
 
 function prop(mf, name, f?) {
