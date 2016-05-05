@@ -30,18 +30,18 @@ function getLinks(html) {
     return $('a').toArray().map(a => a.attribs['href']);
 }
 
-export type Strategy = 'mf2' | 'oembed' | 'html';
+export type Strategy = 'entry' | 'event' | 'oembed' | 'html';
 
 export interface Options {
     strategies: Strategy[];
 }
 
 var defaultOptions: Options = {
-    strategies: ['mf2']
+    strategies: ['entry', 'event']
 };
 
 var strategies = {
-    'mf2' : async function(html, url) {
+    'entry' : async function(html, url) {
         var entry = await getEntry(html, url);
         if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
             try {
@@ -52,6 +52,13 @@ var strategies = {
                 debug('Failed to fetch author page: ' + err.message);
             }
         }
+        return entry;
+    },
+    'event' : async function(html, url) {
+        var event = await getEvent(html, url);
+        var entry = new Entry(url);
+        entry.name = event.name;
+        entry.content = {html: '', value: event.name};
         return entry;
     },
     'oembed': async function(html, url) {
@@ -117,6 +124,14 @@ export async function getEntryFromUrl(url: string, options?: Options): Promise<E
     throw new Error('All strategies failed: ' + errs.reduce((p,c) => p + ',' + c.message));
 }
 
+export async function getEventFromUrl(url: string): Promise<Event> {
+    debug('Fetching ' + url);
+    var res = await request(url);
+    if (res.statusCode != 200)
+        throw new Error('Server returned status ' + res.statusCode);
+    return getEvent(res.body, url);
+}
+
 export async function getCardFromUrl(url: string): Promise<Card> {
     debug('Fetching ' + url);
     var res = await request(url);
@@ -169,6 +184,19 @@ export async function getEntry(html: string, url: string): Promise<Entry> {
     return entry;
 }
 
+export async function getEvent(html: string, url: string): Promise<Event> {
+    var mf = await parser.getAsync({html: html, baseUrl: url});
+    var events = mf.items.filter(i => i.type.some(t => t === 'h-event'));
+    if (events.length == 0)
+        throw new Error('No h-event found');
+    else if (events.length > 1)
+        throw new Error('Multiple h-events found');
+    var event = buildEvent(events[0]);
+    if (event.url == null)
+        event.url = url;
+    return event;
+}
+
 function prop(mf, name, f?) {
     if (mf.properties[name] != null) {
         if (f != null)
@@ -198,6 +226,20 @@ function buildCard(mf) {
     card.url = firstProp(mf, 'url');
     card.uid = firstProp(mf, 'uid');
     return card;
+}
+
+function buildEvent(mf) {
+    if (typeof(mf) === 'string')
+        return new Event(mf);
+    var event = new Event();
+    if (!mf.type.some(t => t === 'h-event'))
+        throw new Error('Attempt to parse ' + mf.type + ' as Event');
+    event.name = firstProp(mf, 'name');
+    event.url = firstProp(mf, 'url');
+    event.start = firstProp(mf, 'start', s => new Date(s));
+    event.end = firstProp(mf, 'end', e => new Date(e));
+    event.location = firstProp(mf, 'location', l => buildCard(l));
+    return event;
 }
 
 function buildEntry(mf) {
@@ -398,3 +440,16 @@ export class Card {
     }
 }
 
+export class Event {
+    name: string = null;
+    url: string = null;
+    start: Date = null;
+    end: Date = null;
+    location: Card = null;
+
+    constructor(url?: string) {
+        if (typeof(url) === 'string') {
+            this.url = url;
+        }
+    }
+}

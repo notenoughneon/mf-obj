@@ -1,6 +1,67 @@
 import assert = require('assert');
 import mfo = require('../index');
 
+describe('event', function() {
+    it('can be constructed with no args', function() {
+        var event = new mfo.Event();
+        assert.equal(event.url, null);
+        assert.equal(event.start, null);
+        assert.equal(event.location, null);
+    });
+    
+    it('can be constructed from url', function() {
+        var url = 'http://2016.indieweb.org';
+        var event = new mfo.Event(url);
+        assert.equal(event.url, url);
+    });
+   
+    it('can load an event', function(done) {
+        var html =
+            '<div class="h-event">\
+            <h1 class="p-name">Indieweb Summit</h1>\
+            <time class="dt-start" datetime="2016-06-03">June 3</time>\
+            <time class="dt-end" datetime="2016-06-05">5</time>\
+            <span class="h-card p-location">\
+                <span class="p-name">Vadio</span>, \
+                <span class="p-street-address">919 SW Taylor St, Ste 300</span>, \
+                <span class="p-locality">Portland</span>, <span class="p-region">Oregon</span>\
+            </span>\
+            </div>';
+        mfo.getEvent(html, 'http://2016.indieweb.org')
+        .then(event => {
+            assert.equal(event.url, 'http://2016.indieweb.org');
+            assert.equal(event.name, 'Indieweb Summit');
+            assert.deepEqual(event.start, new Date('2016-06-03'));
+            assert.deepEqual(event.end, new Date('2016-06-05'));
+            assert.equal(event.location.name, 'Vadio');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('getEventFromUrl works', function(done) {
+        var pages = {
+            'http://2016.indieweb.org': '<div class="h-event">\
+            <h1 class="p-name">Indieweb Summit</h1>\
+            <time class="dt-start" datetime="2016-06-03">June 3</time>\
+            <time class="dt-end" datetime="2016-06-05">5</time>\
+            <span class="h-card p-location">\
+                <span class="p-name">Vadio</span>, \
+                <span class="p-street-address">919 SW Taylor St, Ste 300</span>, \
+                <span class="p-locality">Portland</span>, <span class="p-region">Oregon</span>\
+            </span>\
+            </div>',
+        };
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getEventFromUrl('http://2016.indieweb.org')
+        .then(e => {
+            assert(e.name === 'Indieweb Summit');
+        })
+        .then(done)
+        .catch(done);
+    });
+});
+
 describe('entry', function() {
     var orig_request;
     
@@ -90,7 +151,30 @@ describe('entry', function() {
        .catch(err => done(err.message === 'Multiple h-entries found' ? null : err));
     });
     
-    it('can load non-mf (plain html)', function(done) {
+    it('getEntryFromUrl marshal (event)', function(done) {
+        var pages = {
+            'http://2016.indieweb.org': '<div class="h-event">\
+            <h1 class="p-name">Indieweb Summit</h1>\
+            <time class="dt-start" datetime="2016-06-03">June 3</time>\
+            <time class="dt-end" datetime="2016-06-05">5</time>\
+            <span class="h-card p-location">\
+                <span class="p-name">Vadio</span>, \
+                <span class="p-street-address">919 SW Taylor St, Ste 300</span>, \
+                <span class="p-locality">Portland</span>, <span class="p-region">Oregon</span>\
+            </span>\
+            </div>',
+        };
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getEntryFromUrl('http://2016.indieweb.org')
+        .then(e => {
+            assert.equal(e.url, 'http://2016.indieweb.org');
+            assert.equal(e.name, 'Indieweb Summit');
+        })
+        .then(done)
+        .catch(done);
+    });
+    
+    it('getEntryFromUrl marshal (html)', function(done) {
         var pages = {
             'http://testsite/nonmf.html': '<html>\
                 <head><title>Content title</title></head>\
@@ -110,7 +194,7 @@ describe('entry', function() {
         .catch(done);
     });
     
-    it('can load non-mf (oembed)', function(done) {
+    it('getEntryFromUrl marshal (oembed)', function(done) {
         var pages = {
             'http://testsite/nonmf': '<html>\
                 <head>\
