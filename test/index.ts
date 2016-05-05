@@ -184,7 +184,7 @@ describe('entry', function() {
                 </html>'
         };
         mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
-        mfo.getEntryFromUrl('http://testsite/nonmf.html', {strategies: ['mf2','html']})
+        mfo.getEntryFromUrl('http://testsite/nonmf.html', {strategies: ['entry','html']})
         .then(e => {
             assert.equal(e.url, 'http://testsite/nonmf.html');
             assert.equal(e.name, 'Content title');
@@ -213,7 +213,7 @@ describe('entry', function() {
                 }'
         };
         mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
-        mfo.getEntryFromUrl('http://testsite/nonmf', {strategies: ['mf2','oembed']})
+        mfo.getEntryFromUrl('http://testsite/nonmf', {strategies: ['entry','oembed']})
         .then(e => {
             assert.equal(e.url, 'http://testsite/nonmf');
             assert.equal(e.name, 'Content title');
@@ -235,7 +235,7 @@ describe('entry', function() {
                 </html>'
         };
         mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
-        mfo.getEntryFromUrl('http://testsite/nonmf.html', {strategies: ['mf2','oembed']})
+        mfo.getEntryFromUrl('http://testsite/nonmf.html', {strategies: ['entry','event','oembed']})
        .then(() => assert(false))
        .catch(err => done(err.message.startsWith('All strategies failed') ? null : err));
     });
