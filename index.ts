@@ -25,6 +25,12 @@ async function getOembed(html: string) {
     return embed;
 }
 
+export function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').
+        replace(/</g, '&lt;').
+        replace(/>/g, '&gt;');
+}
+
 function getLinks(html) {
     var $ = cheerio.load(html);
     return $('a').toArray().map(a => a.attribs['href']);
@@ -58,7 +64,7 @@ var strategies = {
         var event = await getEvent(html, url);
         var entry = new Entry(url);
         entry.name = event.name;
-        entry.content = {html: '', value: event.name};
+        entry.content = {html: escapeHtml(event.name), value: event.name};
         return entry;
     },
     'oembed': async function(html, url) {
