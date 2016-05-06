@@ -53,6 +53,8 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   * [getEntry(html, url)](#getentry)
   * [getEntryFromUrl(url)](#getentryfromurl)
   * [getCardFromUrl(url)](#getcardfromurl)
+  * [getEvent(html, url)](#getevent)
+  * [getEventFromUrl(url)](#geteventfromurl)
   * [getThreadFromUrl(url)](#getthreadfromurl)
 2. [Entry](#entry)
   * [name](#name)
@@ -84,6 +86,12 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   * [photo](#photo)
   * [url](#url-1)
   * [uid](#uid)
+4. [Event](#event)
+  * [name](#name-2)
+  * [url](#url-1)
+  * [start](#start)
+  * [end](#end)
+  * [location](#location)
   
 ### Utility functions
 
@@ -105,7 +113,7 @@ mfo.getEntryFromUrl(url)
   //...
 });
 ```
-Fetches the page at url and returns a *Promise* for an Entry. This will perform the authorship algorithm and fetch the author h-card from a separate url if necessary.
+Fetches the page at url and returns a *Promise* for an Entry. This will perform the authorship algorithm and fetch the author h-card from a separate url if necessary. If a single h-event is found instead of an h-entry, it will be marshalled into an Entry for displaying a reply-context.
 
 #### getCardFromUrl()
 
@@ -116,6 +124,26 @@ mfo.getCardFromUrl(url)
 });
 ```
 Fetches the page at url and returns a *Promise* for a Card. This will return null if an h-card could not be found according to the authorship algorithm.
+
+#### getEvent()
+
+```javascript
+mfo.getEvent(html, url)
+.then(event => {
+  //...
+});
+```
+Parses html for a single h-event and returns a *Promise* for an Event. Throws an exception if it does not find one and only one top-level h-event.
+
+#### getEventFromUrl()
+
+```javascript
+mfo.getEventFromUrl(url)
+.then(event => {
+  //...
+});
+```
+Fetches the page at url and returns a *Promise* for an Event.
 
 #### getThreadFromUrl()
 ```javascript
@@ -315,3 +343,33 @@ string || null
 #### uid
 
 string || null
+
+### Event
+
+Represents an h-event. Properties of this object correspond to output from the mf2 parser, but have been converted from arrays of string to other datatypes for convenience.
+
+```javascript
+var event = new mfo.Event();
+var event = new mfo.Event('http://somesite/event');
+```
+The constructor takes an optional argument to set the url.
+
+#### name
+
+string || null
+
+#### url
+
+string || null
+
+#### start
+
+Date || null
+
+#### stop
+
+Date || null
+
+#### Location
+
+Card || null
