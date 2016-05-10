@@ -25,6 +25,19 @@ async function getOembed(html: string) {
     return embed;
 }
 
+function getOpengraph(html: string) {
+    var $ = cheerio.load(html);
+    var res = {
+        title: $('meta[property=\'og:title\']').attr('content'),
+        image: $('meta[property=\'og:image\']').attr('content'),
+        url: $('meta[property=\'og:url\']').attr('content'),
+        description: $('meta[property=\'og:description\']').attr('content')
+    };
+    if (res.title == null || res.url == null)
+        throw new Error('No opengraph data found');
+    return res;
+}
+
 export function escapeHtml(str) {
     return str.replace(/&/g, '&amp;').
         replace(/</g, '&lt;').
@@ -36,7 +49,7 @@ function getLinks(html) {
     return $('a').toArray().map(a => a.attribs['href']);
 }
 
-export type Strategy = 'entry' | 'event' | 'oembed' | 'html';
+export type Strategy = 'entry' | 'event' | 'oembed' | 'opengraph' | 'html';
 
 export interface Options {
     strategies: Strategy[];
@@ -79,6 +92,17 @@ var strategies = {
         if (oembed.author_url != null && oembed.author_name != null) {
             entry.author = new Card(oembed.author_url);
             entry.author.name = oembed.author_name;
+        }
+        return entry;
+    },
+    'opengraph': async function(html, url) {
+        let entry = new Entry(url);
+        let og = getOpengraph(html);
+        if (og.description != null) {
+            entry.name = og.title;
+            entry.content = {html: escapeHtml(og.description), value: og.description};
+        } else {
+            entry.content = {html: escapeHtml(og.title), value: og.title};
         }
         return entry;
     },

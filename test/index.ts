@@ -225,6 +225,32 @@ describe('entry', function() {
         .catch(done);
     });
     
+    it('getEntryFromUrl marshal (opengraph)', function(done) {
+        var pages = {
+            'http://testsite/nonmf': '<html>\
+                <head>\
+                <title>Content title</title>\
+                <meta property="og:title" content="Content title" />\
+                <meta property="og:description" content="Lorem ipsum" />\
+                <meta property="og:url" content="http://testsite/nonmf" />\
+                </head>\
+                <body>\
+                <p>Lorem ipsum <i>dolor</i>\
+                </body>\
+                </html>'
+        };
+        mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
+        mfo.getEntryFromUrl('http://testsite/nonmf', {strategies: ['entry','opengraph']})
+        .then(e => {
+            assert.equal(e.url, 'http://testsite/nonmf');
+            assert.equal(e.name, 'Content title');
+            assert.equal(e.content.html, 'Lorem ipsum');
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    
     it('all strategy failure', function(done) {
         var pages = {
             'http://testsite/nonmf.html': '<html>\
