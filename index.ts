@@ -289,6 +289,7 @@ function buildEntry(mf) {
     entry.replyTo = firstProp(mf, 'in-reply-to', r => buildEntry(r));
     entry.likeOf = firstProp(mf, 'like-of', r => buildEntry(r));
     entry.repostOf = firstProp(mf, 'repost-of', r => buildEntry(r));
+    entry.embed = firstProp(mf, 'x-embed');
     (mf.children || [])
     .concat(mf.properties['comment'] || [])
     .filter(i => i.type.some(t => t === 'h-cite'))
@@ -318,6 +319,7 @@ export class Entry {
     replyTo: Entry = null;
     likeOf: Entry = null;
     repostOf: Entry = null;
+    embed: string = null;
     private children: Map<string, Entry> = new Map();
 
     constructor(url?: string) {
@@ -446,6 +448,7 @@ export class Entry {
                 entry.replyTo = val.replyTo;
                 entry.likeOf = val.likeOf;
                 entry.repostOf = val.repostOf;
+                entry.embed = val.embed;
                 entry.children = val.children;
                 return entry;
             }

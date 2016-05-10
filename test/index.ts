@@ -110,6 +110,7 @@ describe('entry', function() {
 "replyTo":"http://testsite/2015/8/28/2",\
 "likeOf":null,\
 "repostOf":null,\
+"embed":null,\
 "children":["http://testsite/2015/8/28/3"]}';
 
     it('can be serialized', function() {
@@ -290,6 +291,7 @@ describe('entry', function() {
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,
+                    "embed": null,
                     "children":[]
                 });
             }).
@@ -329,10 +331,12 @@ describe('entry', function() {
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
+                        "embed": null,
                         "children":[]
                     },
                     "likeOf":null,
                     "repostOf":null,
+                    "embed": null,
                     "children":[]}
                 );
             }).
@@ -373,9 +377,11 @@ describe('entry', function() {
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
+                        "embed": null,
                         "children":[]
                     },
                     "repostOf":null,
+                    "embed": null,
                     "children":[]}
                 );
             }).
@@ -417,8 +423,10 @@ describe('entry', function() {
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
+                        "embed": null,
                         "children":[]
                     },
+                    "embed": null,
                     "children":[]}
                 );
             }).
@@ -449,6 +457,39 @@ describe('entry', function() {
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,
+                    "embed": null,
+                    "children":[]
+                });
+            }).
+            then(done).
+            catch(done);
+    });
+    
+    it('can read e-x-embed', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/1"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <span class="p-category">indieweb</span>\
+                <div class="p-name e-content">Hello <b>World!</b></div>\
+                <div class="e-x-embed">some <i>embed</i> content</div>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite').
+            then(function(entry) {
+                assert.deepEqual(entry, {
+                    "name":"Hello World!",
+                    "published":new Date("2015-08-28T08:00:00Z"),
+                    "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
+                    "summary":null,
+                    "url":"http://testsite/2015/8/28/1",
+                    "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":["indieweb"],
+                    "syndication":[],
+                    "replyTo":null,
+                    "likeOf":null,
+                    "repostOf":null,
+                    "embed": {html:"some <i>embed</i> content",value:"some embed content"},
                     "children":[]
                 });
             }).
