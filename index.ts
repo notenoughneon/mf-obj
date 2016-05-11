@@ -319,7 +319,7 @@ export class Entry {
     replyTo: Entry = null;
     likeOf: Entry = null;
     repostOf: Entry = null;
-    embed: string = null;
+    embed: {value: string, html: string} = null;
     private children: Map<string, Entry> = new Map();
 
     constructor(url?: string) {
