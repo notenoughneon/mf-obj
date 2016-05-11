@@ -68,6 +68,7 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   * [replyTo](#replyto)
   * [likeOf](#likeof)
   * [repostOf](#repostof)
+  * [embed](#embed)
   * [getDomain()](#getdomain)
   * [getPath()](#getpath)
   * [getReferences()](#getreferences)
@@ -211,6 +212,12 @@ Entry || null
 #### repostOf
 
 Entry || null
+
+#### embed
+
+{html: string, value: string} || null
+
+Experimental property for storing oembed content. Parsed from e-x-embed.
 
 #### getDomain()
 
