@@ -65,6 +65,7 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   * [author](#author)
   * [category](#category)
   * [syndication](#syndication)
+  * [syndicateTo](#syndicateto)
   * [replyTo](#replyto)
   * [likeOf](#likeof)
   * [repostOf](#repostof)
@@ -201,15 +202,27 @@ string[]
 
 string[]
 
+#### syndicateTo
+
+Parsed from syndicate-to.
+
+string[]
+
 #### replyTo
+
+Parsed from in-reply-to.
 
 Entry || null
 
 #### likeOf
 
+Parsed from like-of.
+
 Entry || null
 
 #### repostOf
+
+Parsed from repost-of.
 
 Entry || null
 
