@@ -107,6 +107,7 @@ describe('entry', function() {
 "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},\
 "category":["indieweb"],\
 "syndication":[],\
+"syndicateTo":[],\
 "replyTo":"http://testsite/2015/8/28/2",\
 "likeOf":null,\
 "repostOf":null,\
@@ -288,6 +289,7 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":["indieweb"],
                     "syndication":[],
+                    "syndicateTo":[],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,
@@ -319,6 +321,7 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
                     "syndication":[],
+                    "syndicateTo":[],
                     "replyTo":{
                         "name":null,
                         "published":null,
@@ -328,6 +331,7 @@ describe('entry', function() {
                         "author":null,
                         "category":[],
                         "syndication":[],
+                        "syndicateTo":[],
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
@@ -364,6 +368,7 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
                     "syndication":[],
+                    "syndicateTo":[],
                     "replyTo": null,
                     "likeOf":{
                         "name":null,
@@ -374,6 +379,7 @@ describe('entry', function() {
                         "author":null,
                         "category":[],
                         "syndication":[],
+                        "syndicateTo":[],
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
@@ -409,6 +415,7 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
                     "syndication":[],
+                    "syndicateTo":[],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":{
@@ -420,6 +427,7 @@ describe('entry', function() {
                         "author":null,
                         "category":[],
                         "syndication":[],
+                        "syndicateTo":[],
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
@@ -454,6 +462,7 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":[],
                     "syndication":[],
+                    "syndicateTo":[],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,
@@ -486,10 +495,44 @@ describe('entry', function() {
                     "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
                     "category":["indieweb"],
                     "syndication":[],
+                    "syndicateTo":[],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,
                     "embed": {html:"some <i>embed</i> content",value:"some embed content"},
+                    "children":[]
+                });
+            }).
+            then(done).
+            catch(done);
+    });
+    
+    it('can read u-syndicate-to', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/1"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <span class="p-category">indieweb</span>\
+                <div class="p-name e-content">Hello <b>World!</b></div>\
+                <a class="u-syndicate-to" href="http://twitter.com">twitter</a>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite').
+            then(function(entry) {
+                assert.deepEqual(entry, {
+                    "name":"Hello World!",
+                    "published":new Date("2015-08-28T08:00:00Z"),
+                    "content":{"value":"Hello World!","html":"Hello <b>World!</b>"},
+                    "summary":null,
+                    "url":"http://testsite/2015/8/28/1",
+                    "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":["indieweb"],
+                    "syndication":[],
+                    "syndicateTo":["http://twitter.com"],
+                    "replyTo":null,
+                    "likeOf":null,
+                    "repostOf":null,
+                    "embed": null,
                     "children":[]
                 });
             }).

@@ -286,6 +286,7 @@ function buildEntry(mf) {
     entry.author = firstProp(mf, 'author', a => buildCard(a));
     entry.category = prop(mf, 'category');
     entry.syndication = prop(mf, 'syndication');
+    entry.syndicateTo = prop(mf, 'syndicate-to');
     entry.replyTo = firstProp(mf, 'in-reply-to', r => buildEntry(r));
     entry.likeOf = firstProp(mf, 'like-of', r => buildEntry(r));
     entry.repostOf = firstProp(mf, 'repost-of', r => buildEntry(r));
@@ -316,6 +317,7 @@ export class Entry {
     author: Card = null;
     category: string[] = [];
     syndication: string[] = [];
+    syndicateTo: string[] = [];
     replyTo: Entry = null;
     likeOf: Entry = null;
     repostOf: Entry = null;
@@ -445,6 +447,7 @@ export class Entry {
                 entry.author = val.author;
                 entry.category = val.category;
                 entry.syndication = val.syndication;
+                entry.syndicateTo = val.syndicateTo;
                 entry.replyTo = val.replyTo;
                 entry.likeOf = val.likeOf;
                 entry.repostOf = val.repostOf;
