@@ -62,6 +62,53 @@ describe('event', function() {
     });
 });
 
+describe('feed', function() {
+    it('can be constructed with no args', function() {
+        var feed = new mfo.Feed();
+        assert.equal(feed.url, null);
+        assert.equal(feed.name, null);
+        assert.equal(feed.author, null);
+        assert.deepEqual(feed.getChildren(), []);
+    });
+    
+    it('can be constructed from url', function() {
+        var url = 'http://sometsite';
+        var feed = new mfo.Feed(url);
+        assert.equal(feed.url, url);
+    });
+
+    it('getFeed works', function(done) {
+        var html = '<div class="h-feed">\
+        <div class="p-name">Notes</div>\
+            <div class="h-cite">\
+                <a class="u-url" href="/3"></a>\
+                <div class="p-name e-content">Hello 3</div>\
+            </div>\
+            <div class="h-cite">\
+                <a class="u-url" href="/2"></a>\
+                <div class="p-name e-content">Hello 2</div>\
+            </div>\
+            <div class="h-cite">\
+                <a class="u-url" href="/1"></a>\
+                <div class="p-name e-content">Hello 1</div>\
+            </div>\
+        </div>';
+        mfo.getFeed(html, 'http://somesite')
+        .then(feed => {
+            assert.equal(feed.url, 'http://somesite');
+            assert.equal(feed.name, 'Notes');
+            var children = feed.getChildren();
+            assert.equal(children.length, 3);
+            assert.equal(children[0].url, 'http://somesite/3');
+            assert.equal(children[0].name, 'Hello 3');
+            assert.equal(children[2].url, 'http://somesite/1');
+            assert.equal(children[2].name, 'Hello 1');
+        })
+        .then(done)
+        .catch(done);
+    });
+});
+
 describe('entry', function() {
     var orig_request;
     

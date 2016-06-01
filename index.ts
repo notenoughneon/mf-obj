@@ -227,6 +227,18 @@ export async function getEvent(html: string, url: string): Promise<Event> {
     return event;
 }
 
+export async function getFeed(html: string, url: string): Promise<Feed> {
+    var mf = await parser.getAsync({html: html, baseUrl: url});
+    var feeds = mf.items.filter(i => i.type.some(t => t === 'h-feed'));
+    // return the first feed found, additional feeds ignored
+    if (feeds.length == 0)
+        throw new Error('No h-feed found');
+    var feed = buildFeed(feeds[0]);
+    if (feed.url == null)
+        feed.url = url;
+    return feed;
+}
+
 function prop(mf, name, f?) {
     if (mf.properties[name] != null) {
         if (f != null)
@@ -270,6 +282,23 @@ function buildEvent(mf) {
     event.end = firstProp(mf, 'end', e => new Date(e));
     event.location = firstProp(mf, 'location', l => buildCard(l));
     return event;
+}
+
+function buildFeed(mf) {
+    if (typeof(mf) === 'string')
+        return new Feed(mf);
+    var feed = new Feed();
+    if (!mf.type.some(t => t === 'h-feed'))
+        throw new Error('Attempt to parse ' + mf.type + ' as Feed');
+    feed.name = firstProp(mf, 'name');
+    feed.url = firstProp(mf, 'url');
+    feed.author = firstProp(mf, 'author', a => buildCard(a));
+    (mf.children || [])
+    .filter(i => i.type.some(t => t === 'h-cite' || t === 'h-entry'))
+    .map(e => buildEntry(e))
+    .filter(e => e.url != null)
+    .map(e => feed.addChild(e));
+    return feed;
 }
 
 function buildEntry(mf) {
@@ -487,5 +516,35 @@ export class Event {
         if (typeof(url) === 'string') {
             this.url = url;
         }
+    }
+}
+
+export class Feed {
+    name: string = null;
+    url: string = null;
+    author: Card = null;
+    private children: Map<string, Entry> = new Map();
+
+    constructor(url?: string) {
+        if (typeof(url) === 'string') {
+            this.url = url;
+        }
+    }
+    
+    getChildren(sortFunc?: (a: Entry, b: Entry) => number) {
+        var values = Array.from(this.children.values());
+        if (sortFunc != null)
+            values.sort(sortFunc);
+        return values;
+    }
+    
+    addChild(entry: Entry) {
+        if (entry.url == null)
+            throw new Error('Url must be set');
+        this.children.set(entry.url, entry);
+    }
+    
+    deleteChild(url: string) {
+        return this.children.delete(url);
     }
 }
