@@ -205,12 +205,8 @@ export async function getEntry(html: string, url: string): Promise<Entry> {
         throw new Error('No h-entry found');
     else if (entries.length > 1)
         throw new Error('Multiple h-entries found');
-    let entry = buildEntry(entries[0]);
-    if (entry.author === null) {
-        if (mf.rels.author != null && mf.rels.author.length > 0) {
-            entry.author = new Card(mf.rels.author[0]);
-        }
-    }
+    var relAuthor = mf.rels.author != null && mf.rels.author.length > 0 ? new Card(mf.rels.author[0]) : null;
+    let entry = buildEntry(entries[0], relAuthor);
     return entry;
 }
 
@@ -301,7 +297,7 @@ function buildFeed(mf) {
     return feed;
 }
 
-function buildEntry(mf) {
+function buildEntry(mf, defaultAuthor?: Card) {
     if (typeof(mf) === 'string')
         return new Entry(mf);
     var entry = new Entry();
@@ -313,6 +309,8 @@ function buildEntry(mf) {
     entry.summary = firstProp(mf, 'summary');
     entry.url = firstProp(mf, 'url');
     entry.author = firstProp(mf, 'author', a => buildCard(a));
+    if (entry.author === null && defaultAuthor)
+        entry.author = defaultAuthor;
     entry.category = prop(mf, 'category');
     entry.syndication = prop(mf, 'syndication');
     entry.syndicateTo = prop(mf, 'syndicate-to');
