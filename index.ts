@@ -198,6 +198,14 @@ export async function getCardFromUrl(url: string): Promise<Card> {
     return null;
 }
 
+export async function getFeedFromUrl(url: string): Promise<Feed> {
+    debug('Fetching ' + url);
+    var res = await request(url);
+    if (res.statusCode != 200)
+        throw new Error('Server returned status ' + res.statusCode);
+    return getFeed(res.body, url);
+}
+
 export async function getEntry(html: string, url: string): Promise<Entry> {
     var mf = await parser.getAsync({html: html, baseUrl: url});
     var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
@@ -229,7 +237,7 @@ export async function getFeed(html: string, url: string): Promise<Feed> {
     // return the first feed found, additional feeds ignored
     if (feeds.length == 0)
         throw new Error('No h-feed found');
-    var feed = buildFeed(feeds[0]);
+    var feed = await buildFeed(feeds[0]);
     if (feed.url == null)
         feed.url = url;
     return feed;
@@ -280,7 +288,7 @@ function buildEvent(mf) {
     return event;
 }
 
-function buildFeed(mf) {
+async function buildFeed(mf) {
     if (typeof(mf) === 'string')
         return new Feed(mf);
     var feed = new Feed();
@@ -289,9 +297,18 @@ function buildFeed(mf) {
     feed.name = firstProp(mf, 'name');
     feed.url = firstProp(mf, 'url');
     feed.author = firstProp(mf, 'author', a => buildCard(a));
+    if (feed.author !== null && feed.author.url !== null && feed.author.name === null) {
+        try {
+            var author = await getCardFromUrl(feed.author.url);
+            if (author !== null)
+                feed.author = author;
+        } catch (err) {
+            debug('Failed to fetch author page: ' + err.message);
+        }
+    }
     (mf.children || [])
     .filter(i => i.type.some(t => t === 'h-cite' || t === 'h-entry'))
-    .map(e => buildEntry(e))
+    .map(e => buildEntry(e, feed.author))
     .filter(e => e.url != null)
     .map(e => feed.addChild(e));
     return feed;
