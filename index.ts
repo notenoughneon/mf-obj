@@ -343,7 +343,7 @@ function buildEntry(mf, defaultAuthor?: Card) {
     entry.embed = firstProp(mf, 'x-embed');
     (mf.children || [])
     .concat(mf.properties['comment'] || [])
-    .filter(i => i.type.some(t => t === 'h-cite'))
+    .filter(i => i.type.some(t => t === 'h-cite' || t === 'h-entry'))
     .map(e => buildEntry(e))
     .filter(e => e.url != null)
     .map(e => entry.addChild(e));
