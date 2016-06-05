@@ -115,22 +115,24 @@ var strategies = {
     }
 }
 
-export async function getThreadFromUrl(seed: string) {
+export async function getThreadFromUrl(seed: string, options?: Options) {
     var boundary: string[] = [];
     var entryDict: Map<string, Entry> = new Map();
     boundary.push(seed);
     while (boundary.length > 0) {
         let url = boundary.shift();
         try {
-            let entry = await getEntryFromUrl(url);
+            let entry = await getEntryFromUrl(url, options);
             entryDict.set(url, entry);
             let references = entry.getChildren().map(c => c.url)
                 .concat(entry.getReferences())
                 .filter(r => !entryDict.has(r));
             boundary = boundary.concat(references);
         } catch (err) {
-            debug('Broken link: ' + err);
-            entryDict.set(url, new Entry(url));
+            debug('Error fetching post: ' + err);
+            let entry = new Entry(url);
+            entry.content = {value: '[Error fetching post]', html: '[Error fetching post]'};
+            entryDict.set(url, entry);
         }
     }
     return Array.from(entryDict.values());
