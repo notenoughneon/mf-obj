@@ -115,27 +115,31 @@ var strategies = {
     }
 }
 
-export async function getThreadFromUrl(seed: string, options?: Options) {
+export async function getThreadFromUrl(seed: string, options?: Options, includeErr?: boolean) {
     var boundary: string[] = [];
-    var entryDict: Map<string, Entry> = new Map();
+    var seen: Set<string> = new Set();
+    var entries: Map<string, Entry> = new Map();
     boundary.push(seed);
     while (boundary.length > 0) {
         let url = boundary.shift();
         try {
+            seen.add(url);
             let entry = await getEntryFromUrl(url, options);
-            entryDict.set(url, entry);
+            entries.set(url, entry);
             let references = entry.getChildren().map(c => c.url)
                 .concat(entry.getReferences())
-                .filter(r => !entryDict.has(r));
+                .filter(r => !seen.has(r));
             boundary = boundary.concat(references);
         } catch (err) {
             debug('Error fetching post: ' + err);
-            let entry = new Entry(url);
-            entry.content = {value: '[Error fetching post]', html: '[Error fetching post]'};
-            entryDict.set(url, entry);
+            if (includeErr === true || includeErr === undefined) {
+                let entry = new Entry(url);
+                entry.content = {value: '[Error fetching post]', html: '[Error fetching post]'};
+                entries.set(url, entry);
+            }
         }
     }
-    return Array.from(entryDict.values());
+    return Array.from(entries.values());
 }
 
 export async function getEntryFromUrl(url: string, options?: Options): Promise<Entry> {
