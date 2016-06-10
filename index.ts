@@ -21,7 +21,6 @@ async function getOembed(html: string) {
     if (res.statusCode !== 200)
         throw new Error('Server returned status ' + res.statusCode);
     var embed = JSON.parse(res.body);
-    debug(embed);
     return embed;
 }
 
