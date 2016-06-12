@@ -58,7 +58,7 @@ var defaultOptions: Options = {
     strategies: ['entry', 'event']
 };
 
-var strategies = {
+var entryStrategies = {
     'entry' : async function(html, url) {
         var entry = await getEntry(html, url);
         if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
@@ -151,7 +151,7 @@ export async function getEntryFromUrl(url: string, options?: Options): Promise<E
         throw new Error('Server returned status ' + res.statusCode);
     for (let s of options.strategies) {
         try {
-            return await strategies[s](res.body, url);
+            return await entryStrategies[s](res.body, url);
         } catch (err) {
             errs.push(err);
         }
@@ -236,16 +236,46 @@ export async function getEvent(html: string, url: string): Promise<Event> {
     return event;
 }
 
+var feedStrategies = {
+    'hfeed': async function(html, url) {
+        var mf = await parser.getAsync({html: html, baseUrl: url});
+        var feeds = mf.items.filter(i => i.type.some(t => t === 'h-feed'));
+        if (feeds.length == 0)
+            throw new Error('No h-feed found');
+        else if (feeds.length > 1)
+            throw new Error('Multiple h-feeds found');
+        var feed = await buildFeed(feeds[0]);
+        if (feed.url == null)
+            feed.url = url;
+        return feed;
+    },
+    'implied': async function(html, url) {
+        var mf = await parser.getAsync({html: html, baseUrl: url});
+        var entries = mf.items.filter(i => i.type.some(t => t === 'h-entry'));
+        if (entries.length == 0)
+            throw new Error('No h-entries found');
+        var feed = new Feed(url);
+        var $ = cheerio.load(html);
+        feed.name = $('title').text();
+        feed.author = await getCardFromUrl(url);
+        for (let entry of entries) {
+            feed.addChild(buildEntry(entry, feed.author));
+        }
+        return feed;
+    }
+};
+
 export async function getFeed(html: string, url: string): Promise<Feed> {
-    var mf = await parser.getAsync({html: html, baseUrl: url});
-    var feeds = mf.items.filter(i => i.type.some(t => t === 'h-feed'));
-    // return the first feed found, additional feeds ignored
-    if (feeds.length == 0)
-        throw new Error('No h-feed found');
-    var feed = await buildFeed(feeds[0]);
-    if (feed.url == null)
-        feed.url = url;
-    return feed;
+    var strategies = ['hfeed', 'implied'];
+    var errs = [];
+    for (let s of strategies) {
+        try {
+            return await feedStrategies[s](html, url);
+        } catch (err) {
+            errs.push(err);
+        }
+    }
+    throw new Error('All strategies failed: ' + errs.reduce((p,c) => p + ',' + c.message));
 }
 
 function prop(mf, name, f?) {

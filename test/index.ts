@@ -87,18 +87,18 @@ describe('feed', function() {
         assert.equal(feed.url, url);
     });
 
-    it('getFeed works', function(done) {
+    it('getFeed (h-feed)', function(done) {
         var html = '<div class="h-feed">\
         <div class="p-name">Notes</div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/3"></a>\
                 <div class="p-name e-content">Hello 3</div>\
             </div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/2"></a>\
                 <div class="p-name e-content">Hello 2</div>\
             </div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/1"></a>\
                 <div class="p-name e-content">Hello 1</div>\
             </div>\
@@ -117,20 +117,58 @@ describe('feed', function() {
         .then(done)
         .catch(done);
     });
-    
-    it('authorship by h-feed', function(done) {
+
+    it('getFeed (implied)', function(done) {
+        var pages = {
+            'http://somesite': '<html>\
+            <head><title>Notes</title></head>\
+            <body>\
+            <div>\
+                <div class="h-entry">\
+                    <a class="u-url" href="/3"></a>\
+                    <div class="p-name e-content">Hello 3</div>\
+                </div>\
+                <div class="h-entry">\
+                    <a class="u-url" href="/2"></a>\
+                    <div class="p-name e-content">Hello 2</div>\
+                </div>\
+                <div class="h-entry">\
+                    <a class="u-url" href="/1"></a>\
+                    <div class="p-name e-content">Hello 1</div>\
+                </div>\
+            </div>\
+            </body>\
+            </html>'
+        };
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getFeedFromUrl('http://somesite')
+        .then(feed => {
+            assert.equal(feed.url, 'http://somesite');
+            assert.equal(feed.name, 'Notes');
+            var children = feed.getChildren();
+            assert.equal(children.length, 3);
+            assert.equal(children[0].url, 'http://somesite/3');
+            assert.equal(children[0].name, 'Hello 3');
+            assert.equal(children[2].url, 'http://somesite/1');
+            assert.equal(children[2].name, 'Hello 1');
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    it('getFeed authorship (h-feed)', function(done) {
         var html = '<div class="h-feed">\
         <a class="p-author h-card" href="/"><img src="me.jpg">Test User</a>\
         <div class="p-name">Notes</div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/3"></a>\
                 <div class="p-name e-content">Hello 3</div>\
             </div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/2"></a>\
                 <div class="p-name e-content">Hello 2</div>\
             </div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/1"></a>\
                 <div class="p-name e-content">Hello 1</div>\
             </div>\
@@ -148,21 +186,52 @@ describe('feed', function() {
         .catch(done);
     });
 
-    it('authorship by h-feed (separate author-page)', function(done) {
+    it('getFeed authorship (implied)', function(done) {
+        var pages = {
+            'http://somesite/': '<div>\
+        <a class="h-card u-url u-uid" href="/"><img src="me.jpg">Test User</a>\
+            <div class="h-entry">\
+                <a class="u-url" href="/3"></a>\
+                <div class="p-name e-content">Hello 3</div>\
+            </div>\
+            <div class="h-entry">\
+                <a class="u-url" href="/2"></a>\
+                <div class="p-name e-content">Hello 2</div>\
+            </div>\
+            <div class="h-entry">\
+                <a class="u-url" href="/1"></a>\
+                <div class="p-name e-content">Hello 1</div>\
+            </div>\
+        </div>'
+        };
+        mfo.request = url => Promise.resolve({statusCode: 200, body: pages[url]});
+        mfo.getFeedFromUrl('http://somesite/')
+        .then(feed => {
+            assert.equal(feed.url, 'http://somesite/');
+            var children = feed.getChildren();
+            assert.equal(children[0].author.name, 'Test User');
+            assert.equal(children[0].author.url, 'http://somesite/');
+            assert.equal(children[0].author.photo, 'http://somesite/me.jpg');
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    it('getFeed authorship (h-feed, separate author-page)', function(done) {
         var pages = {
             'http://somesite/': '<div class="h-card"><a class="u-uid" href="/"><img src="me.jpg">Test User</a></div>\
             <div class="h-feed">\
         <a class="u-author" href="/"></a>\
         <div class="p-name">Notes</div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/3"></a>\
                 <div class="p-name e-content">Hello 3</div>\
             </div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/2"></a>\
                 <div class="p-name e-content">Hello 2</div>\
             </div>\
-            <div class="h-cite">\
+            <div class="h-entry">\
                 <a class="u-url" href="/1"></a>\
                 <div class="p-name e-content">Hello 1</div>\
             </div>\
