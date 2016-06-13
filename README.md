@@ -66,6 +66,9 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   * [category](#category)
   * [syndication](#syndication)
   * [syndicateTo](#syndicateto)
+  * [photo](#photo)
+  * [audio](#audio)
+  * [video](#video)
   * [replyTo](#replyto)
   * [likeOf](#likeof)
   * [repostOf](#repostof)
@@ -208,6 +211,18 @@ Parsed from syndicate-to.
 
 string[]
 
+#### photo
+
+string[]
+
+#### audio
+
+string[]
+
+#### video
+
+string[]
+
 #### replyTo
 
 Parsed from in-reply-to.
@@ -323,9 +338,14 @@ Example output:
     },
   "category":["indieweb"],
   "syndication":[],
+  "syndicateTo":[],
+  "photo":[],
+  "audio":[],
+  "video":[],
   "replyTo":"http://testsite/2015/8/28/2",
   "likeOf":null,
   "repostOf":null,
+  "embed":null,
   "children":["http://testsite/2015/8/28/3"]
 }
 ```

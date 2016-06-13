@@ -299,6 +299,9 @@ describe('entry', function() {
 "category":["indieweb"],\
 "syndication":[],\
 "syndicateTo":[],\
+"photo":[],\
+"audio":[],\
+"video":[],\
 "replyTo":"http://testsite/2015/8/28/2",\
 "likeOf":null,\
 "repostOf":null,\
@@ -481,6 +484,111 @@ describe('entry', function() {
                     "category":["indieweb"],
                     "syndication":[],
                     "syndicateTo":[],
+                    "photo":[],
+                    "audio":[],
+                    "video":[],
+                    "replyTo":null,
+                    "likeOf":null,
+                    "repostOf":null,
+                    "embed": null,
+                    "children":[]
+                });
+            }).
+            then(done).
+            catch(done);
+    });
+
+    it('can load a photo', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/1"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content"><img class="u-photo" src="teacup.jpg"> Caption</div>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite/2015/8/28/1').
+            then(function(entry) {
+                assert.deepEqual(entry, {
+                    "name":"Caption",
+                    "published":new Date("2015-08-28T08:00:00Z"),
+                    "content":{"value":"Caption","html":'<img class="u-photo" src="http://testsite/2015/8/28/teacup.jpg" /> Caption'},
+                    "summary":null,
+                    "url":"http://testsite/2015/8/28/1",
+                    "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":[],
+                    "syndication":[],
+                    "syndicateTo":[],
+                    "photo":["http://testsite/2015/8/28/teacup.jpg"],
+                    "audio":[],
+                    "video":[],
+                    "replyTo":null,
+                    "likeOf":null,
+                    "repostOf":null,
+                    "embed": null,
+                    "children":[]
+                });
+            }).
+            then(done).
+            catch(done);
+    });
+
+    it('can load audio', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/1"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content"><audio class="u-audio" src="track.ogg"></audio> Caption</div>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite/2015/8/28/1').
+            then(function(entry) {
+                assert.deepEqual(entry, {
+                    "name":"Caption",
+                    "published":new Date("2015-08-28T08:00:00Z"),
+                    "content":{"value":"Caption","html":'<audio class="u-audio" src="http://testsite/2015/8/28/track.ogg"></audio> Caption'},
+                    "summary":null,
+                    "url":"http://testsite/2015/8/28/1",
+                    "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":[],
+                    "syndication":[],
+                    "syndicateTo":[],
+                    "photo":[],
+                    "audio":["http://testsite/2015/8/28/track.ogg"],
+                    "video":[],
+                    "replyTo":null,
+                    "likeOf":null,
+                    "repostOf":null,
+                    "embed": null,
+                    "children":[]
+                });
+            }).
+            then(done).
+            catch(done);
+    });
+
+    it('can load video', function(done) {
+        var html =
+            '<div class="h-entry">\
+                <a class="u-url" href="/2015/8/28/1"></a>\
+                <time class="dt-published" datetime="2015-08-28T08:00:00Z"></time>\
+                <a class="p-author h-card" href="http://testsite">Test User</a>\
+                <div class="p-name e-content"><video class="u-video" src="movie.mp4"></video> Caption</div>\
+            </div>';
+        mfo.getEntry(html, 'http://testsite/2015/8/28/1').
+            then(function(entry) {
+                assert.deepEqual(entry, {
+                    "name":"Caption",
+                    "published":new Date("2015-08-28T08:00:00Z"),
+                    "content":{"value":"Caption","html":'<video class="u-video" src="http://testsite/2015/8/28/movie.mp4"></video> Caption'},
+                    "summary":null,
+                    "url":"http://testsite/2015/8/28/1",
+                    "author":{"name":"Test User","photo":null,"url":"http://testsite","uid":null},
+                    "category":[],
+                    "syndication":[],
+                    "syndicateTo":[],
+                    "photo":[],
+                    "audio":[],
+                    "video":["http://testsite/2015/8/28/movie.mp4"],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,
@@ -513,6 +621,9 @@ describe('entry', function() {
                     "category":[],
                     "syndication":[],
                     "syndicateTo":[],
+                    "photo":[],
+                    "audio":[],
+                    "video":[],
                     "replyTo":{
                         "name":null,
                         "published":null,
@@ -523,6 +634,9 @@ describe('entry', function() {
                         "category":[],
                         "syndication":[],
                         "syndicateTo":[],
+                        "photo":[],
+                        "audio":[],
+                        "video":[],
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
@@ -560,6 +674,9 @@ describe('entry', function() {
                     "category":[],
                     "syndication":[],
                     "syndicateTo":[],
+                    "photo":[],
+                    "audio":[],
+                    "video":[],
                     "replyTo": null,
                     "likeOf":{
                         "name":null,
@@ -571,6 +688,9 @@ describe('entry', function() {
                         "category":[],
                         "syndication":[],
                         "syndicateTo":[],
+                        "photo":[],
+                        "audio":[],
+                        "video":[],
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
@@ -607,6 +727,9 @@ describe('entry', function() {
                     "category":[],
                     "syndication":[],
                     "syndicateTo":[],
+                    "photo":[],
+                    "audio":[],
+                    "video":[],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":{
@@ -619,6 +742,9 @@ describe('entry', function() {
                         "category":[],
                         "syndication":[],
                         "syndicateTo":[],
+                        "photo":[],
+                        "audio":[],
+                        "video":[],
                         "replyTo":null,
                         "likeOf":null,
                         "repostOf":null,
@@ -654,6 +780,9 @@ describe('entry', function() {
                     "category":[],
                     "syndication":[],
                     "syndicateTo":[],
+                    "photo":[],
+                    "audio":[],
+                    "video":[],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,
@@ -687,6 +816,9 @@ describe('entry', function() {
                     "category":["indieweb"],
                     "syndication":[],
                     "syndicateTo":[],
+                    "photo":[],
+                    "audio":[],
+                    "video":[],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,
@@ -720,6 +852,9 @@ describe('entry', function() {
                     "category":["indieweb"],
                     "syndication":[],
                     "syndicateTo":["http://twitter.com"],
+                    "photo":[],
+                    "audio":[],
+                    "video":[],
                     "replyTo":null,
                     "likeOf":null,
                     "repostOf":null,

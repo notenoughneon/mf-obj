@@ -366,6 +366,9 @@ function buildEntry(mf, defaultAuthor?: Card) {
     entry.category = prop(mf, 'category');
     entry.syndication = prop(mf, 'syndication');
     entry.syndicateTo = prop(mf, 'syndicate-to');
+    entry.photo = prop(mf, 'photo');
+    entry.audio = prop(mf, 'audio');
+    entry.video = prop(mf, 'video');
     entry.replyTo = firstProp(mf, 'in-reply-to', r => buildEntry(r));
     entry.likeOf = firstProp(mf, 'like-of', r => buildEntry(r));
     entry.repostOf = firstProp(mf, 'repost-of', r => buildEntry(r));
@@ -397,6 +400,9 @@ export class Entry {
     category: string[] = [];
     syndication: string[] = [];
     syndicateTo: string[] = [];
+    photo: string[] = [];
+    audio: string[] = [];
+    video: string[] = [];
     replyTo: Entry = null;
     likeOf: Entry = null;
     repostOf: Entry = null;
