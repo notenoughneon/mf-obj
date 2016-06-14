@@ -55,6 +55,8 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   * [getCardFromUrl(url)](#getcardfromurl)
   * [getEvent(html, url)](#getevent)
   * [getEventFromUrl(url)](#geteventfromurl)
+  * [getFeed(html, url)](#getfeed)
+  * [getFeedFromUrl(url)](#getfeedfromurl)
   * [getThreadFromUrl(url)](#getthreadfromurl)
 2. [Entry](#entry)
   * [name](#name)
@@ -97,6 +99,16 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   * [start](#start)
   * [end](#end)
   * [location](#location)
+5. [Feed](#feed)
+  * [name](#name-3)
+  * [url](#url-2)
+  * [author](#author-2)
+  * [prev](#prev)
+  * [next](#next)
+  * [getChildren(sortFunc?)](#getchildren-2)
+  * [addChild(entry)](#addchild-2)
+  * [deleteChild(url)](#deletechild-2)
+
   
 ### Utility functions
 
@@ -150,6 +162,27 @@ mfo.getEventFromUrl(url)
 ```
 Fetches the page at url and returns a *Promise* for an Event.
 
+#### getFeed()
+
+```javascript
+mfo.getFeed(html, url)
+.then(feed => {
+  //...
+});
+```
+Parses html for a single h-feed (or implied h-feed) and returns a *Promise* for a Feed. Throws an exception if it does not find at least one h-feed or h-entry.
+
+#### getFeedFromUrl()
+
+```javascript
+mfo.getFeedFromUrl(url)
+.then(feed => {
+  //...
+});
+```
+Fetches the page at url and returns a *Promise* for a Feed.
+
+
 #### getThreadFromUrl()
 ```javascript
 mfo.getThreadFromUrl(url)
@@ -195,7 +228,7 @@ string || null
 
 Card || null
 
-See [Card](#card) below.
+See [Card](#card).
 
 #### category
 
@@ -413,3 +446,51 @@ Date || null
 #### Location
 
 Card || null
+
+### Feed
+
+Represents an h-feed. Properties of this object correspond to output from the mf2 parser, but have been converted from arrays of string to other datatypes for convenience.
+
+```javascript
+var event = new mfo.Feed();
+var event = new mfo.Feed('http://somesite');
+```
+The constructor takes an optional argument to set the url.
+
+#### name
+
+string || null
+
+#### url
+
+string || null
+
+#### author
+
+Card || null
+
+See [Card](#card).
+
+#### prev
+
+Parsed from rel="prev" or rel="previous".
+
+string || null
+
+#### next
+
+Parsed from rel="next".
+
+string || null
+
+#### getChildren()
+
+Returns an array of Entries. Use this instead of directly accessing the children property. Takes an optional argument to sort the results.
+
+#### addChild()
+
+Adds an Entry to the list of children. If there is an existing child with the same url, it will be overwritten.
+
+#### deleteChild()
+
+Remove an entry from the list of children by url.
