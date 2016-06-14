@@ -247,6 +247,10 @@ var feedStrategies = {
         var feed = await buildFeed(feeds[0]);
         if (feed.url == null)
             feed.url = url;
+        if (mf.rels.prev != null && mf.rels.prev.length > 0)
+            feed.prev = mf.rels.prev[0];
+        if (mf.rels.next != null && mf.rels.next.length > 0)
+            feed.next = mf.rels.next[0];
         return feed;
     },
     'implied': async function(html, url) {
@@ -261,6 +265,10 @@ var feedStrategies = {
         for (let entry of entries) {
             feed.addChild(buildEntry(entry, feed.author));
         }
+        if (mf.rels.prev != null && mf.rels.prev.length > 0)
+            feed.prev = mf.rels.prev[0];
+        if (mf.rels.next != null && mf.rels.next.length > 0)
+            feed.next = mf.rels.next[0];
         return feed;
     }
 };
@@ -579,6 +587,8 @@ export class Feed {
     name: string = null;
     url: string = null;
     author: Card = null;
+    prev: string = null;
+    next: string = null;
     private children: Map<string, Entry> = new Map();
 
     constructor(url?: string) {

@@ -89,7 +89,8 @@ describe('feed', function() {
 
     it('getFeed (h-feed)', function(done) {
         var html = '<div class="h-feed">\
-        <div class="p-name">Notes</div>\
+            <a class="u-url" href="http://somesite"></a>\
+            <div class="p-name">Notes</div>\
             <div class="h-entry">\
                 <a class="u-url" href="/3"></a>\
                 <div class="p-name e-content">Hello 3</div>\
@@ -102,6 +103,8 @@ describe('feed', function() {
                 <a class="u-url" href="/1"></a>\
                 <div class="p-name e-content">Hello 1</div>\
             </div>\
+            <a rel="prev" href="prev"></a>\
+            <a rel="next" href="next"></a>\
         </div>';
         mfo.getFeed(html, 'http://somesite')
         .then(feed => {
@@ -113,6 +116,8 @@ describe('feed', function() {
             assert.equal(children[0].name, 'Hello 3');
             assert.equal(children[2].url, 'http://somesite/1');
             assert.equal(children[2].name, 'Hello 1');
+            assert.equal(feed.prev, 'http://somesite/prev');
+            assert.equal(feed.next, 'http://somesite/next');
         })
         .then(done)
         .catch(done);
@@ -136,6 +141,8 @@ describe('feed', function() {
                     <a class="u-url" href="/1"></a>\
                     <div class="p-name e-content">Hello 1</div>\
                 </div>\
+                <a rel="prev" href="prev"></a>\
+                <a rel="next" href="next"></a>\
             </div>\
             </body>\
             </html>'
@@ -151,6 +158,8 @@ describe('feed', function() {
             assert.equal(children[0].name, 'Hello 3');
             assert.equal(children[2].url, 'http://somesite/1');
             assert.equal(children[2].name, 'Hello 1');
+            assert.equal(feed.prev, 'http://somesite/prev');
+            assert.equal(feed.next, 'http://somesite/next');
         })
         .then(done)
         .catch(done);
