@@ -249,6 +249,8 @@ var feedStrategies = {
             feed.url = url;
         if (mf.rels.prev != null && mf.rels.prev.length > 0)
             feed.prev = mf.rels.prev[0];
+        else if (mf.rels.previous != null && mf.rels.previous.length > 0)
+            feed.prev = mf.rels.previous[0];
         if (mf.rels.next != null && mf.rels.next.length > 0)
             feed.next = mf.rels.next[0];
         return feed;
@@ -267,6 +269,8 @@ var feedStrategies = {
         }
         if (mf.rels.prev != null && mf.rels.prev.length > 0)
             feed.prev = mf.rels.prev[0];
+        else if (mf.rels.previous != null && mf.rels.previous.length > 0)
+            feed.prev = mf.rels.previous[0];
         if (mf.rels.next != null && mf.rels.next.length > 0)
             feed.next = mf.rels.next[0];
         return feed;
