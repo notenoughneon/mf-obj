@@ -260,19 +260,19 @@ string[]
 
 Parsed from in-reply-to.
 
-Entry || null
+Entry[] || null
 
 #### likeOf
 
 Parsed from like-of.
 
-Entry || null
+Entry[] || null
 
 #### repostOf
 
 Parsed from repost-of.
 
-Entry || null
+Entry[] || null
 
 #### embed
 
@@ -334,15 +334,15 @@ function receiveWebmention(sourceUrl, targetUrl) {
 
 #### isReply()
 
-Tests if reply-to is set.
+Tests if reply-to is non-empty.
 
 #### isLike()
 
-Tests if like-of is set.
+Tests if like-of is non-empty.
 
 #### isRepost()
 
-Tests if repost-of is set.
+Tests if repost-of is non-empty.
 
 #### isArticle()
 
@@ -375,9 +375,9 @@ Example output:
   "photo":[],
   "audio":[],
   "video":[],
-  "replyTo":"http://testsite/2015/8/28/2",
-  "likeOf":null,
-  "repostOf":null,
+  "replyTo":["http://testsite/2015/8/28/2"],
+  "likeOf":[],
+  "repostOf":[],
   "embed":null,
   "children":["http://testsite/2015/8/28/3"]
 }
