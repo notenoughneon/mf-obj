@@ -6,7 +6,7 @@ var debug = require('debug')('mf-obj');
 
 export var request = function(url: string): Promise<any> {
     return new Promise((resolve, reject) => {
-        Request.get({url, headers: {'User-Agent': 'request'}}, (err, result) => err !== null ? reject(err) : resolve(result));
+        Request.get({url, headers: {'User-Agent': 'mf-obj'}}, (err, result) => err !== null ? reject(err) : resolve(result));
     });
 }
 
