@@ -51,7 +51,7 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
 
 1. [Utility functions](#utility-functions)
   * [getEntry(html, url)](#getentry)
-  * [getEntryFromUrl(url)](#getentryfromurl)
+  * [getEntryFromUrl(url, strategies?)](#getentryfromurl)
   * [getCardFromUrl(url)](#getcardfromurl)
   * [getEvent(html, url)](#getevent)
   * [getEventFromUrl(url)](#geteventfromurl)
@@ -129,7 +129,23 @@ mfo.getEntryFromUrl(url)
   //...
 });
 ```
-Fetches the page at url and returns a *Promise* for an Entry. This will perform the authorship algorithm and fetch the author h-card from a separate url if necessary. If a single h-event is found instead of an h-entry, it will be marshalled into an Entry for displaying a reply-context.
+
+```javascript
+mfo.getEntryFromUrl(url, ['entry','event','oembed'])
+.then(entry => {
+    //...
+});
+```
+
+Fetches the page at `url` and returns a *Promise* for an Entry. This will perform the authorship algorithm and fetch the author h-card from a separate url if necessary. If a single h-event is found instead of an h-entry, it will be marshalled into an Entry for displaying a reply-context.
+
+The second parameter `strategies` is an optional array of strategies to attempt to marshal to an Entry. Strategies are tried in order and if all fail, an exception is thrown. This can be used for displaying comments or reply contexts of URLs that don't contain h-entries. The default value for this parameter is `['entry']`.
+
+* `entry` - Default h-entry strategy.
+* `event` - Marshall an h-event to an Entry. Useful for creating RSVP reply-contexts to an h-event.
+* `oembed` - Marshall oembed data to an Entry. Useful for creating reply-contexts or reposts of silo content.
+* `opengraph` - Marshall opengraph data to an Entry. Useful for creating reply-contexts or reposts of silo content.
+* `html` - Most basic strategy. Marshalls html `<title>` to name and `<body>` to content.
 
 #### getCardFromUrl()
 
