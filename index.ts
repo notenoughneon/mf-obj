@@ -114,33 +114,6 @@ var entryStrategies = {
     }
 }
 
-export async function getThreadFromUrl(seed: string, options?: Options, includeErr?: boolean) {
-    var boundary: string[] = [];
-    var seen: Set<string> = new Set();
-    var entries: Map<string, Entry> = new Map();
-    boundary.push(seed);
-    while (boundary.length > 0) {
-        let url = boundary.shift();
-        try {
-            seen.add(url);
-            let entry = await getEntryFromUrl(url, options);
-            entries.set(url, entry);
-            let references = entry.getChildren().map(c => c.url)
-                .concat(entry.getReferences())
-                .filter(r => !seen.has(r));
-            boundary = boundary.concat(references);
-        } catch (err) {
-            debug('Error fetching post: ' + err);
-            if (includeErr === true || includeErr === undefined) {
-                let entry = new Entry(url);
-                entry.content = {value: '[Error fetching post]', html: '[Error fetching post]'};
-                entries.set(url, entry);
-            }
-        }
-    }
-    return Array.from(entries.values());
-}
-
 export async function getEntryFromUrl(url: string, options?: Options): Promise<Entry> {
     if (options == null)
         options = defaultOptions;

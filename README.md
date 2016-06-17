@@ -57,7 +57,6 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   * [getEventFromUrl(url)](#geteventfromurl)
   * [getFeed(html, url)](#getfeed)
   * [getFeedFromUrl(url)](#getfeedfromurl)
-  * [getThreadFromUrl(url)](#getthreadfromurl)
 2. [Entry](#entry)
   * [name](#name)
   * [published](#published)
@@ -181,18 +180,6 @@ mfo.getFeedFromUrl(url)
 });
 ```
 Fetches the page at url and returns a *Promise* for a Feed.
-
-
-#### getThreadFromUrl()
-```javascript
-mfo.getThreadFromUrl(url)
-.then(thread => {
-  for (let entry of thread) {
-    // ...
-  }
-});
-```
-Follows the chain of replies starting at url and returns a *Promise* for an array of Entry objects. This uses breadth-first search to traverse the graph of posts found by following the urls in reply-to, like-of, repost-of, and children.
 
 ### Entry
 

@@ -1087,42 +1087,6 @@ describe('entry', function() {
         .catch(done);
     });
     
-    it('getThreadFromUrl works', function(done) {
-        var pages = {
-            'http://somesite/1': '<div class="h-entry">\
-                <a class="u-url" href="/1"></a>\
-                <div class="p-name e-content">content 1</div>\
-                </div>',
-            'http://somesite/2': '<div class="h-entry">\
-                <a class="u-in-reply-to" href="/1"></a>\
-                <a class="u-url" href="/2"></a>\
-                <div class="p-name e-content">content 2</div>\
-                <div class="h-cite"><a class="u-url" href="/3"></a></div>\
-                </div>',
-            'http://somesite/3': '<div class="h-entry">\
-                <a class="u-url" href="/3"></a>\
-                <div class="p-name e-content">content 3</div>\
-                <div class="h-cite"><a class="u-url" href="http://othersite/4"></a></div>\
-                </div>',
-            'http://othersite/4': '<div class="h-entry">\
-                <a class="u-url" href="/4"></a>\
-                <div class="p-name e-content">content 4</div>\
-                </div>'
-        };
-        mfo.request = url => Promise.resolve(pages[url] ? {statusCode: 200, body: pages[url]} : {statusCode: 404, body: ''});
-        mfo.getThreadFromUrl('http://somesite/2')
-        .then(t => {
-            assert.deepEqual(t.map(e => e.url), [
-                'http://somesite/2',
-                'http://somesite/3',
-                'http://somesite/1',
-                'http://othersite/4']);
-            assert.deepEqual(t.map(e => e.name), ['content 2', 'content 3', 'content 1', 'content 4']);
-        })
-        .then(done)
-        .catch(done);
-    });
-    
     it('filters non-cite from children', function(done) {
         var html = '<div class="h-entry">\
         <div class="h-cite"><a class="u-url" href="http://othersite/123"></a>a comment</div>\
