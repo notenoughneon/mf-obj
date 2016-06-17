@@ -48,15 +48,7 @@ function getLinks(html) {
     return $('a').toArray().map(a => a.attribs['href']);
 }
 
-export type Strategy = 'entry' | 'event' | 'oembed' | 'opengraph' | 'html';
-
-export interface Options {
-    strategies: Strategy[];
-}
-
-var defaultOptions: Options = {
-    strategies: ['entry', 'event']
-};
+export type EntryStrategy = 'entry' | 'event' | 'oembed' | 'opengraph' | 'html';
 
 var entryStrategies = {
     'entry' : async function(html, url) {
@@ -114,15 +106,15 @@ var entryStrategies = {
     }
 }
 
-export async function getEntryFromUrl(url: string, options?: Options): Promise<Entry> {
-    if (options == null)
-        options = defaultOptions;
+export async function getEntryFromUrl(url: string, strategies?: EntryStrategy[]): Promise<Entry> {
+    if (strategies == null)
+        strategies = ['entry'];
     var errs = [];
     debug('Fetching ' + url);
     var res = await request(url);
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
-    for (let s of options.strategies) {
+    for (let s of strategies) {
         try {
             return await entryStrategies[s](res.body, url);
         } catch (err) {
