@@ -276,7 +276,7 @@ describe('entry', function() {
     it('can be constructed with no args', function() {
         var entry = new mfo.Entry();
         assert.equal(entry.url, null);
-        assert.equal(entry.replyTo, null);
+        assert.deepEqual(entry.replyTo, []);
         assert.deepEqual(entry.getChildren(), []);
     });
 
@@ -296,7 +296,7 @@ describe('entry', function() {
     serializeEntry.author = new mfo.Card();
     serializeEntry.author.name = 'Test User';
     serializeEntry.author.url = 'http://testsite';
-    serializeEntry.replyTo = new mfo.Entry('http://testsite/2015/8/28/2');
+    serializeEntry.replyTo = [new mfo.Entry('http://testsite/2015/8/28/2')];
     serializeEntry.addChild(new mfo.Entry('http://testsite/2015/8/28/3'));
 
     var serializeJson = '{"name":"Hello World!",\
@@ -311,9 +311,9 @@ describe('entry', function() {
 "photo":[],\
 "audio":[],\
 "video":[],\
-"replyTo":"http://testsite/2015/8/28/2",\
-"likeOf":null,\
-"repostOf":null,\
+"replyTo":["http://testsite/2015/8/28/2"],\
+"likeOf":[],\
+"repostOf":[],\
 "embed":null,\
 "children":["http://testsite/2015/8/28/3"]}';
 
@@ -333,9 +333,9 @@ describe('entry', function() {
 "author":null,\
 "category":[],\
 "syndication":[],\
-"replyTo":null,\
-"likeOf":null,\
-"repostOf":null,\
+"replyTo":[],\
+"likeOf":[],\
+"repostOf":[],\
 "children":[]}';
         var entry = mfo.Entry.deserialize(json);
         assert.equal(entry.name, null);
@@ -496,9 +496,9 @@ describe('entry', function() {
                     "photo":[],
                     "audio":[],
                     "video":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "embed": null,
                     "children":[]
                 });
@@ -530,9 +530,9 @@ describe('entry', function() {
                     "photo":["http://testsite/2015/8/28/teacup.jpg"],
                     "audio":[],
                     "video":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "embed": null,
                     "children":[]
                 });
@@ -564,9 +564,9 @@ describe('entry', function() {
                     "photo":[],
                     "audio":["http://testsite/2015/8/28/track.ogg"],
                     "video":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "embed": null,
                     "children":[]
                 });
@@ -598,9 +598,9 @@ describe('entry', function() {
                     "photo":[],
                     "audio":[],
                     "video":["http://testsite/2015/8/28/movie.mp4"],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "embed": null,
                     "children":[]
                 });
@@ -633,7 +633,7 @@ describe('entry', function() {
                     "photo":[],
                     "audio":[],
                     "video":[],
-                    "replyTo":{
+                    "replyTo":[{
                         "name":null,
                         "published":null,
                         "content":null,
@@ -646,14 +646,14 @@ describe('entry', function() {
                         "photo":[],
                         "audio":[],
                         "video":[],
-                        "replyTo":null,
-                        "likeOf":null,
-                        "repostOf":null,
+                        "replyTo":[],
+                        "likeOf":[],
+                        "repostOf":[],
                         "embed": null,
                         "children":[]
-                    },
-                    "likeOf":null,
-                    "repostOf":null,
+                    }],
+                    "likeOf":[],
+                    "repostOf":[],
                     "embed": null,
                     "children":[]}
                 );
@@ -686,8 +686,8 @@ describe('entry', function() {
                     "photo":[],
                     "audio":[],
                     "video":[],
-                    "replyTo": null,
-                    "likeOf":{
+                    "replyTo": [],
+                    "likeOf":[{
                         "name":null,
                         "published":null,
                         "content":null,
@@ -700,13 +700,13 @@ describe('entry', function() {
                         "photo":[],
                         "audio":[],
                         "video":[],
-                        "replyTo":null,
-                        "likeOf":null,
-                        "repostOf":null,
+                        "replyTo":[],
+                        "likeOf":[],
+                        "repostOf":[],
                         "embed": null,
                         "children":[]
-                    },
-                    "repostOf":null,
+                    }],
+                    "repostOf":[],
                     "embed": null,
                     "children":[]}
                 );
@@ -739,9 +739,9 @@ describe('entry', function() {
                     "photo":[],
                     "audio":[],
                     "video":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":{
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[{
                         "name":null,
                         "published":null,
                         "content":null,
@@ -754,12 +754,12 @@ describe('entry', function() {
                         "photo":[],
                         "audio":[],
                         "video":[],
-                        "replyTo":null,
-                        "likeOf":null,
-                        "repostOf":null,
+                        "replyTo":[],
+                        "likeOf":[],
+                        "repostOf":[],
                         "embed": null,
                         "children":[]
-                    },
+                    }],
                     "embed": null,
                     "children":[]}
                 );
@@ -792,9 +792,9 @@ describe('entry', function() {
                     "photo":[],
                     "audio":[],
                     "video":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "embed": null,
                     "children":[]
                 });
@@ -828,9 +828,9 @@ describe('entry', function() {
                     "photo":[],
                     "audio":[],
                     "video":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "embed": {html:"some <i>embed</i> content",value:"some embed content"},
                     "children":[]
                 });
@@ -864,9 +864,9 @@ describe('entry', function() {
                     "photo":[],
                     "audio":[],
                     "video":[],
-                    "replyTo":null,
-                    "likeOf":null,
-                    "repostOf":null,
+                    "replyTo":[],
+                    "likeOf":[],
+                    "repostOf":[],
                     "embed": null,
                     "children":[]
                 });

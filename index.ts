@@ -381,9 +381,9 @@ function buildEntry(mf, defaultAuthor?: Card) {
     entry.photo = prop(mf, 'photo');
     entry.audio = prop(mf, 'audio');
     entry.video = prop(mf, 'video');
-    entry.replyTo = firstProp(mf, 'in-reply-to', r => buildEntry(r));
-    entry.likeOf = firstProp(mf, 'like-of', r => buildEntry(r));
-    entry.repostOf = firstProp(mf, 'repost-of', r => buildEntry(r));
+    entry.replyTo = prop(mf, 'in-reply-to', r => buildEntry(r));
+    entry.likeOf = prop(mf, 'like-of', r => buildEntry(r));
+    entry.repostOf = prop(mf, 'repost-of', r => buildEntry(r));
     entry.embed = firstProp(mf, 'x-embed');
     (mf.children || [])
     .concat(mf.properties['comment'] || [])
@@ -415,9 +415,9 @@ export class Entry {
     photo: string[] = [];
     audio: string[] = [];
     video: string[] = [];
-    replyTo: Entry = null;
-    likeOf: Entry = null;
-    repostOf: Entry = null;
+    replyTo: Entry[] = [];
+    likeOf: Entry[] = [];
+    repostOf: Entry[] = [];
     embed: {value: string, html: string} = null;
     private children: Map<string, Entry> = new Map();
 
@@ -454,14 +454,7 @@ export class Entry {
     }
 
     getReferences(): string[] {
-        var ref: Entry[] = [];
-        if (this.replyTo != null)
-            ref.push(this.replyTo);
-        if (this.likeOf != null)
-            ref.push(this.likeOf);
-        if (this.repostOf != null)
-            ref.push(this.repostOf);
-        return ref.map(r => r.url);
+        return this.replyTo.concat(this.likeOf).concat(this.repostOf).map(r => r.url);
     }
 
     getMentions(): string[] {
@@ -489,15 +482,15 @@ export class Entry {
     }
 
     isReply(): boolean {
-        return this.replyTo != null;
+        return this.replyTo.length > 0;
     }
 
     isRepost(): boolean {
-        return this.repostOf != null;
+        return this.repostOf.length > 0;
     }
 
     isLike(): boolean {
-        return this.likeOf != null;
+        return this.likeOf.length > 0;
     }
 
     isArticle(): boolean {
@@ -513,7 +506,7 @@ export class Entry {
     serialize(): string {
         return JSON.stringify(this, (key,val) => {
             if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf')
-                return val === null ? null : val.url;
+                return val.map(e => e.url);
             if (key === 'children')
                 return Array.from(val.values()).map(r => r.url);
             return val;
@@ -531,7 +524,7 @@ export class Entry {
                 return author;
             }
             if (key === 'replyTo' || key === 'repostOf' || key === 'likeOf')
-                return val === null ? null : new Entry(val);
+                return val.map(e => new Entry(e));
             if (key === 'children')
                 return new Map(val.map(url => [url, new Entry(url)]));
             if (key === '') {
