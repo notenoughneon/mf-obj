@@ -176,7 +176,7 @@ export async function getFeed(url: string): Promise<Feed> {
     return getFeedFromHtml(res.body, url);
 }
 
-async function getEntryFromHtml(html: string, url: string): Promise<Entry> {
+export async function getEntryFromHtml(html: string, url: string): Promise<Entry> {
     var mf = await parser.getAsync({html: html, baseUrl: url});
     var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
     if (entries.length == 0)
