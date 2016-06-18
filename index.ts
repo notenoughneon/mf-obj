@@ -52,10 +52,10 @@ export type EntryStrategy = 'entry' | 'event' | 'oembed' | 'opengraph' | 'html';
 
 var entryStrategies = {
     'entry' : async function(html, url) {
-        var entry = await getEntry(html, url);
+        var entry = await getEntryFromHtml(html, url);
         if (entry.author !== null && entry.author.url !== null && entry.author.name === null) {
             try {
-                var author = await getCardFromUrl(entry.author.url);
+                var author = await getCard(entry.author.url);
                 if (author !== null)
                     entry.author = author;
             } catch (err) {
@@ -65,7 +65,7 @@ var entryStrategies = {
         return entry;
     },
     'event' : async function(html, url) {
-        var event = await getEvent(html, url);
+        var event = await getEventFromHtml(html, url);
         var entry = new Entry(url);
         entry.name = event.name;
         entry.content = {html: escapeHtml(event.name), value: event.name};
@@ -106,7 +106,7 @@ var entryStrategies = {
     }
 }
 
-export async function getEntryFromUrl(url: string, strategies?: EntryStrategy[]): Promise<Entry> {
+export async function getEntry(url: string, strategies?: EntryStrategy[]): Promise<Entry> {
     if (strategies == null)
         strategies = ['entry'];
     var errs = [];
@@ -124,15 +124,15 @@ export async function getEntryFromUrl(url: string, strategies?: EntryStrategy[])
     throw new Error('All strategies failed: ' + errs.reduce((p,c) => p + ',' + c.message));
 }
 
-export async function getEventFromUrl(url: string): Promise<Event> {
+export async function getEvent(url: string): Promise<Event> {
     debug('Fetching ' + url);
     var res = await request(url);
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
-    return getEvent(res.body, url);
+    return getEventFromHtml(res.body, url);
 }
 
-export async function getCardFromUrl(url: string): Promise<Card> {
+export async function getCard(url: string): Promise<Card> {
     debug('Fetching ' + url);
     var res = await request(url);
     if (res.statusCode != 200)
@@ -168,15 +168,15 @@ export async function getCardFromUrl(url: string): Promise<Card> {
     return null;
 }
 
-export async function getFeedFromUrl(url: string): Promise<Feed> {
+export async function getFeed(url: string): Promise<Feed> {
     debug('Fetching ' + url);
     var res = await request(url);
     if (res.statusCode != 200)
         throw new Error('Server returned status ' + res.statusCode);
-    return getFeed(res.body, url);
+    return getFeedFromHtml(res.body, url);
 }
 
-export async function getEntry(html: string, url: string): Promise<Entry> {
+async function getEntryFromHtml(html: string, url: string): Promise<Entry> {
     var mf = await parser.getAsync({html: html, baseUrl: url});
     var entries = mf.items.filter(i => i.type.some(t => t == 'h-entry'));
     if (entries.length == 0)
@@ -188,7 +188,7 @@ export async function getEntry(html: string, url: string): Promise<Entry> {
     return entry;
 }
 
-export async function getEvent(html: string, url: string): Promise<Event> {
+async function getEventFromHtml(html: string, url: string): Promise<Event> {
     var mf = await parser.getAsync({html: html, baseUrl: url});
     var events = mf.items.filter(i => i.type.some(t => t === 'h-event'));
     if (events.length == 0)
@@ -228,7 +228,7 @@ var feedStrategies = {
         var feed = new Feed(url);
         var $ = cheerio.load(html);
         feed.name = $('title').text();
-        feed.author = await getCardFromUrl(url);
+        feed.author = await getCard(url);
         for (let entry of entries) {
             feed.addChild(buildEntry(entry, feed.author));
         }
@@ -242,7 +242,7 @@ var feedStrategies = {
     }
 };
 
-export async function getFeed(html: string, url: string): Promise<Feed> {
+async function getFeedFromHtml(html: string, url: string): Promise<Feed> {
     var strategies = ['hfeed', 'implied'];
     var errs = [];
     for (let s of strategies) {
@@ -311,7 +311,7 @@ async function buildFeed(mf) {
     feed.author = firstProp(mf, 'author', a => buildCard(a));
     if (feed.author !== null && feed.author.url !== null && feed.author.name === null) {
         try {
-            var author = await getCardFromUrl(feed.author.url);
+            var author = await getCard(feed.author.url);
             if (author !== null)
                 feed.author = author;
         } catch (err) {
