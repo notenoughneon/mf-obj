@@ -96,7 +96,7 @@ mfo.getEntry('http://somesite/2016/5/1/1')
   
 ### Utility functions
 
-#### getEntryFromUrl()
+#### getEntry()
 
 ```javascript
 mfo.getEntry(url)
