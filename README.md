@@ -25,21 +25,9 @@ npm install mf-obj --save
 
 ## Examples
 
-### Parse entry from html
+### Get entry from url
 ```javascript
-var mfo = require('mf-obj');
-
-var html = '<div class="h-entry">\
-<div class="p-name">Hello world!</div>\
-</div>';
-
-mfo.getEntry(html, 'http://somesite/2016/5/1/1')
-.then(entry => console.log(entry.name));
-```
-
-### Fetch entry from url
-```javascript
-mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
+mfo.getEntry('http://somesite/2016/5/1/1')
 .then(entry => {
     if (entry.isReply() {
         console.log('I\'m a reply to "' + entry.replyTo.name + '"');
@@ -50,13 +38,10 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
 ## API
 
 1. [Utility functions](#utility-functions)
-  * [getEntry(html, url)](#getentry)
-  * [getEntryFromUrl(url, strategies?)](#getentryfromurl)
-  * [getCardFromUrl(url)](#getcardfromurl)
-  * [getEvent(html, url)](#getevent)
-  * [getEventFromUrl(url)](#geteventfromurl)
-  * [getFeed(html, url)](#getfeed)
-  * [getFeedFromUrl(url)](#getfeedfromurl)
+  * [getEntry(url, strategies?)](#getentry)
+  * [getCard(url)](#getcard)
+  * [getEvent(url)](#getevent)
+  * [getFeed(url)](#getfeed)
 2. [Entry](#entry)
   * [name](#name)
   * [published](#published)
@@ -111,33 +96,23 @@ mfo.getEntryFromUrl('http://somesite/2016/5/1/1')
   
 ### Utility functions
 
-#### getEntry()
-
-```javascript
-mfo.getEntry(html, url)
-.then(entry => {
-  //...
-});
-```
-Parses html for a single h-entry and returns a *Promise* for an Entry. Throws an exception if it does not find one and only one top-level h-entry.
-
 #### getEntryFromUrl()
 
 ```javascript
-mfo.getEntryFromUrl(url)
+mfo.getEntry(url)
 .then(entry => {
   //...
 });
 ```
 
 ```javascript
-mfo.getEntryFromUrl(url, ['entry','event','oembed'])
+mfo.getEntry(url, ['entry','event','oembed'])
 .then(entry => {
     //...
 });
 ```
 
-Fetches the page at `url` and returns a *Promise* for an Entry. This will perform the authorship algorithm and fetch the author h-card from a separate url if necessary. If a single h-event is found instead of an h-entry, it will be marshalled into an Entry for displaying a reply-context.
+Fetches the page at `url` and returns a *Promise* for an [Entry](#entry). This will perform the authorship algorithm and fetch the author h-card from a separate url if necessary.
 
 The second parameter `strategies` is an optional array of strategies to attempt to marshal to an Entry. Strategies are tried in order and if all fail, an exception is thrown. This can be used for displaying comments or reply contexts of URLs that don't contain h-entries. The default value for this parameter is `['entry']`.
 
@@ -147,55 +122,35 @@ The second parameter `strategies` is an optional array of strategies to attempt 
 * `opengraph` - Marshall opengraph data to an Entry. Useful for creating reply-contexts or reposts of silo content.
 * `html` - Most basic strategy. Marshalls html `<title>` to name and `<body>` to content.
 
-#### getCardFromUrl()
+#### getCard()
 
 ```javascript
-mfo.getCardFromUrl(url)
+mfo.getCard(url)
 .then(card => {
   //...
 });
 ```
-Fetches the page at url and returns a *Promise* for a Card. This will return null if an h-card could not be found according to the authorship algorithm.
+Fetches the page at url and returns a *Promise* for a [Card](#card). This will return null if an h-card could not be found according to the authorship algorithm.
 
 #### getEvent()
 
 ```javascript
-mfo.getEvent(html, url)
+mfo.getEvent(url)
 .then(event => {
   //...
 });
 ```
-Parses html for a single h-event and returns a *Promise* for an Event. Throws an exception if it does not find one and only one top-level h-event.
-
-#### getEventFromUrl()
-
-```javascript
-mfo.getEventFromUrl(url)
-.then(event => {
-  //...
-});
-```
-Fetches the page at url and returns a *Promise* for an Event.
+Fetches the page at url and returns a *Promise* for an [Event](#event).
 
 #### getFeed()
 
 ```javascript
-mfo.getFeed(html, url)
+mfo.getFeed(url)
 .then(feed => {
   //...
 });
 ```
-Parses html for a single h-feed (or implied h-feed) and returns a *Promise* for a Feed. Throws an exception if it does not find at least one h-feed or h-entry.
-
-#### getFeedFromUrl()
-
-```javascript
-mfo.getFeedFromUrl(url)
-.then(feed => {
-  //...
-});
-```
-Fetches the page at url and returns a *Promise* for a Feed.
+Fetches the page at url and returns a *Promise* for a [Feed](#feed).
 
 ### Entry
 
